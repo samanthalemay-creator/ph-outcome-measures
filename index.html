@@ -47,7 +47,7 @@
                         <input type="date" id="patientDOB" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                     <div>
-                        <label for="primaryPhysician" class="block text-sm font-medium text-gray-700 mb-2">Primary Physician</label>
+                        <label for="primaryPhysician" class="block text-sm font-medium text-gray-700 mb-2">Referring Physician</label>
                         <input type="text" id="primaryPhysician" class="w-full p-3 rounded-lg border border-gray-300 focus:ring-indigo-500 focus:border-indigo-500" placeholder="e.g., Dr. Smith">
                     </div>
                     <div>
@@ -440,4 +440,186 @@
             
             savePatientInfo();
             document.getElementById('savePatientInfoBtn').textContent = 'Update Information';
-            showMessage
+            showMessage('Patient information saved successfully!');
+        });
+
+        document.getElementById('trackerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const entryType = document.getElementById('entryType').value;
+            let newEntry = { 
+                entryType, 
+                timestamp: getEntryTimestamp() 
+            };
+
+            if (entryType === 'urination') {
+                newEntry.urge = document.querySelector('input[name="urge"]:checked').value;
+                newEntry.amount = document.getElementById('urinationAmount').value;
+                newEntry.leakage = document.querySelector('input[name="urinationLeakage"]:checked').value;
+                newEntry.leakageActivity = newEntry.leakage === 'Yes' ? document.getElementById('urinationLeakageActivity').value : '';
+                newEntry.padUsage = document.querySelector('input[name="urinationPadUsage"]:checked').value;
+            } else if (entryType === 'bowelMovement') {
+                newEntry.consistency = document.getElementById('consistency').value;
+                newEntry.urgency = document.querySelector('input[name="urgency"]:checked').value;
+                newEntry.leakage = document.querySelector('input[name="bowelLeakage"]:checked').value;
+                newEntry.leakageActivity = newEntry.leakage === 'Yes' ? document.getElementById('bowelLeakageActivity').value : '';
+                newEntry.padUsage = document.querySelector('input[name="bowelPadUsage"]:checked').value;
+            } else if (entryType === 'beverage') {
+                newEntry.beverageType = document.getElementById('beverageType').value;
+                newEntry.beverageAmount = document.getElementById('beverageAmount').value;
+            }
+
+            entries.push(newEntry);
+            saveToLocalStorage();
+            renderEntries();
+            document.getElementById('trackerForm').reset();
+            
+            // Reset time mode to current time after submission
+            document.querySelector('input[name="timeMode"][value="now"]').checked = true;
+            document.getElementById('manualDate').disabled = true;
+            document.getElementById('manualTime').disabled = true;
+            document.getElementById('manualDate').classList.add('bg-gray-100');
+            document.getElementById('manualTime').classList.add('bg-gray-100');
+            
+            showMessage('Entry added successfully!');
+        });
+
+        // Entry type change handler
+        document.getElementById('entryType').addEventListener('change', (e) => {
+            const urinationFields = document.getElementById('urination-fields');
+            const bowelFields = document.getElementById('bowel-fields');
+            const beverageFields = document.getElementById('beverage-fields');
+            
+            urinationFields.classList.add('hidden');
+            bowelFields.classList.add('hidden');
+            beverageFields.classList.add('hidden');
+            
+            if (e.target.value === 'urination') {
+                urinationFields.classList.remove('hidden');
+            } else if (e.target.value === 'bowelMovement') {
+                bowelFields.classList.remove('hidden');
+            } else if (e.target.value === 'beverage') {
+                beverageFields.classList.remove('hidden');
+            }
+        });
+
+        // Leakage activity handlers
+        document.querySelectorAll('input[name="urinationLeakage"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const container = document.getElementById('urinationLeakageActivityContainer');
+                if (e.target.value === 'Yes') {
+                    container.classList.remove('hidden');
+                } else {
+                    container.classList.add('hidden');
+                }
+            });
+        });
+
+        document.querySelectorAll('input[name="bowelLeakage"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const container = document.getElementById('bowelLeakageActivityContainer');
+                if (e.target.value === 'Yes') {
+                    container.classList.remove('hidden');
+                } else {
+                    container.classList.add('hidden');
+                }
+            });
+        });
+
+        // Export CSV functionality
+        document.getElementById('exportCsvBtn').addEventListener('click', () => {
+            if (entries.length === 0) {
+                showMessage('No data to export.', 'error');
+                return;
+            }
+
+            // Create comprehensive CSV headers
+            const headers = [
+                'Date',
+                'Time', 
+                'Entry Type',
+                'Urge Level',
+                'Urination Amount (oz)',
+                'Bowel Consistency',
+                'Urgency Level',
+                'Leakage (Yes/No)',
+                'Leakage Activity',
+                'Pad/Brief Usage',
+                'Beverage Type',
+                'Beverage Amount (oz)',
+                'Notes'
+            ];
+
+            const csvRows = [headers.join(',')];
+
+            // Sort entries by timestamp (most recent first)
+            const sortedEntries = [...entries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+            sortedEntries.forEach(entry => {
+                const entryDate = new Date(entry.timestamp);
+                const date = entryDate.toLocaleDateString();
+                const time = entryDate.toLocaleTimeString();
+
+                const row = [
+                    `"${date}"`,
+                    `"${time}"`,
+                    `"${entry.entryType.replace(/([A-Z])/g, ' $1')}"`, // Format camelCase to readable text
+                    `"${entry.urge || ''}"`,
+                    `"${entry.amount || ''}"`,
+                    `"${entry.consistency || ''}"`,
+                    `"${entry.urgency || ''}"`,
+                    `"${entry.leakage || ''}"`,
+                    `"${entry.leakageActivity || ''}"`,
+                    `"${entry.padUsage || ''}"`,
+                    `"${entry.beverageType || ''}"`,
+                    `"${entry.beverageAmount || ''}"`,
+                    `""` // Notes column for future use
+                ];
+                csvRows.push(row.join(','));
+            });
+
+            // Generate filename with patient name if available
+            let filename = 'bladder_bowel_diary';
+            if (patientInfo.name && patientInfo.name.trim()) {
+                // Clean the name for filename (remove special characters)
+                const cleanName = patientInfo.name.trim().replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
+                filename = `${cleanName}_bladder_bowel_diary`;
+            }
+            filename += `_${new Date().toISOString().split('T')[0]}.csv`;
+
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', filename);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showMessage('Data exported successfully! Open in Excel or Google Sheets for best viewing.');
+        });
+
+        // Clear all data functionality
+        document.getElementById('clearDataBtn').addEventListener('click', () => {
+            if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+                entries = [];
+                patientInfo = {};
+                localStorage.removeItem('bladderBowelEntries');
+                localStorage.removeItem('patientInfo');
+                renderEntries();
+                document.getElementById('patientInfoForm').reset();
+                document.getElementById('savePatientInfoBtn').textContent = 'Save Information';
+                showMessage('All data cleared successfully.');
+            }
+        });
+
+        // Initialize the app
+        updateCurrentTimeDisplay();
+        setInterval(updateCurrentTimeDisplay, 1000);
+        setupTimeMode();
+        loadPatientInfo();
+        renderEntries();
+    </script>
+</body>
+</html>
