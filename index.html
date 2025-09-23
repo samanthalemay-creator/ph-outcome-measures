@@ -365,7 +365,11 @@
                 const entryElement = document.createElement('div');
                 entryElement.className = 'bg-gray-50 p-4 rounded-xl shadow-sm border border-gray-200';
                 
-                const date = new Date(entry.timestamp).toLocaleString();
+                const entryDate = new Date(entry.timestamp);
+                const dateStr = entryDate.toLocaleDateString();
+                const timeStr = entryDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                const date = `${dateStr} ${timeStr}`;
+                
                 let details = '';
 
                 if (entry.entryType === 'urination') {
@@ -533,7 +537,16 @@
                 return;
             }
 
-            // Create comprehensive CSV headers
+            const csvRows = [];
+
+            // Add patient information header section (only name and DOB)
+            csvRows.push('PATIENT INFORMATION');
+            csvRows.push(`"Patient Name:","${patientInfo.name || 'Not provided'}"`);
+            csvRows.push(`"Date of Birth:","${patientInfo.dob || 'Not provided'}"`);
+            csvRows.push(''); // Empty row for separation
+
+            // Create comprehensive CSV headers for data entries
+            csvRows.push('TRACKING ENTRIES');
             const headers = [
                 'Date',
                 'Time', 
@@ -550,7 +563,7 @@
                 'Notes'
             ];
 
-            const csvRows = [headers.join(',')];
+            csvRows.push(headers.join(','));
 
             // Sort entries by timestamp (most recent first)
             const sortedEntries = [...entries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -558,15 +571,25 @@
             sortedEntries.forEach(entry => {
                 const entryDate = new Date(entry.timestamp);
                 const date = entryDate.toLocaleDateString();
-                const time = entryDate.toLocaleTimeString();
+                const time = entryDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                // Format entry type with proper capitalization
+                let entryTypeFormatted = '';
+                if (entry.entryType === 'urination') {
+                    entryTypeFormatted = 'Urination';
+                } else if (entry.entryType === 'bowelMovement') {
+                    entryTypeFormatted = 'Bowel Movement';
+                } else if (entry.entryType === 'beverage') {
+                    entryTypeFormatted = 'Beverage';
+                }
 
                 const row = [
                     `"${date}"`,
                     `"${time}"`,
-                    `"${entry.entryType.replace(/([A-Z])/g, ' $1')}"`, // Format camelCase to readable text
+                    `"${entryTypeFormatted}"`,
                     `"${entry.urge || ''}"`,
                     `"${entry.amount || ''}"`,
-                    `"${entry.consistency || ''}"`,
+                    `"${entry.consistency ? entry.consistency.split(':')[0] : ''}"`,
                     `"${entry.urgency || ''}"`,
                     `"${entry.leakage || ''}"`,
                     `"${entry.leakageActivity || ''}"`,
