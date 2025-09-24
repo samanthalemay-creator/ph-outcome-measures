@@ -1,1 +1,645 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pelvic Health Outcome Calculator</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .lucide { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        // Lucide React Icons (simplified)
+        const Heart = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5Z"/>
+            </svg>
+        );
+        
+        const FileText = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                <line x1="10" x2="16" y1="13" y2="13"/>
+                <line x1="10" x2="16" y1="17" y2="17"/>
+                <polyline points="10,9 9,9 8,9"/>
+            </svg>
+        );
+        
+        const RotateCcw = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                <path d="M3 3v5h5"/>
+            </svg>
+        );
+
+        const Calculator = () => (
+            <svg className="lucide" viewBox="0 0 24 24">
+                <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
+                <line x1="8" x2="16" y1="6" y2="6"/>
+                <line x1="8" x2="16" y1="10" y2="10"/>
+                <line x1="8" x2="16" y1="14" y2="14"/>
+                <line x1="8" x2="16" y1="18" y2="18"/>
+            </svg>
+        );
+
+        const PelvicHealthCalculator = () => {
+            const [selectedTest, setSelectedTest] = React.useState('');
+            const [scores, setScores] = React.useState({});
+            const [results, setResults] = React.useState(null);
+            const [calculatorMode, setCalculatorMode] = React.useState('direct');
+            const [individualScores, setIndividualScores] = React.useState({});
+
+            const assessmentTools = {
+                'APFQ': {
+                    name: 'Australian Pelvic Floor Questionnaire',
+                    maxScore: 168, minScore: 42, questions: 42,
+                    interpretation: (score) => {
+                        const percentage = ((score - 42) / 126) * 100;
+                        let level = '';
+                        if (percentage <= 20) level = 'Minimal pelvic floor dysfunction';
+                        else if (percentage <= 40) level = 'Mild pelvic floor dysfunction';
+                        else if (percentage <= 60) level = 'Moderate pelvic floor dysfunction';
+                        else if (percentage <= 80) level = 'Severe pelvic floor dysfunction';
+                        else level = 'Very severe pelvic floor dysfunction';
+                        return { percentage: percentage.toFixed(1), level };
+                    }
+                },
+                'PAC-SYM': {
+                    name: 'Patient Assessment of Constipation Symptoms',
+                    maxScore: 48, minScore: 12, questions: 12,
+                    interpretation: (score) => {
+                        const percentage = ((score - 12) / 36) * 100;
+                        let level = '';
+                        if (percentage <= 25) level = 'Minimal constipation symptoms';
+                        else if (percentage <= 50) level = 'Mild constipation symptoms';
+                        else if (percentage <= 75) level = 'Moderate constipation symptoms';
+                        else level = 'Severe constipation symptoms';
+                        return { percentage: percentage.toFixed(1), level };
+                    }
+                },
+                'FIQL': {
+                    name: 'Fecal Incontinence Quality of Life Scale',
+                    maxScore: 116, minScore: 29, questions: 29,
+                    interpretation: (score) => {
+                        const percentage = ((116 - score) / 87) * 100;
+                        let level = '';
+                        if (percentage <= 20) level = 'Excellent quality of life';
+                        else if (percentage <= 40) level = 'Good quality of life';
+                        else if (percentage <= 60) level = 'Fair quality of life';
+                        else if (percentage <= 80) level = 'Poor quality of life';
+                        else level = 'Very poor quality of life';
+                        return { percentage: percentage.toFixed(1), level };
+                    }
+                },
+                'MENQOL': {
+                    name: 'Menopause-Specific Quality of Life',
+                    maxScore: 232, minScore: 29, questions: 29,
+                    interpretation: (score) => {
+                        const percentage = ((score - 29) / 203) * 100;
+                        let level = '';
+                        if (percentage <= 20) level = 'Minimal menopausal symptoms';
+                        else if (percentage <= 40) level = 'Mild menopausal symptoms';
+                        else if (percentage <= 60) level = 'Moderate menopausal symptoms';
+                        else if (percentage <= 80) level = 'Severe menopausal symptoms';
+                        else level = 'Very severe menopausal symptoms';
+                        return { percentage: percentage.toFixed(1), level };
+                    }
+                },
+                'PFDI': {
+                    name: 'Pelvic Floor Disability Index (PFDI-20)',
+                    maxScore: 300, minScore: 0, questions: 20,
+                    subscales: {
+                        'POPDI-6': { questions: [1, 2, 3, 4, 5, 6], name: 'Pelvic Organ Prolapse Distress Inventory' },
+                        'CRADI-8': { questions: [7, 8, 9, 10, 11, 12, 13, 14], name: 'Colorectal-Anal Distress Inventory' },
+                        'UDI-6': { questions: [15, 16, 17, 18, 19, 20], name: 'Urinary Distress Inventory' }
+                    },
+                    interpretation: (score) => {
+                        const percentage = (score / 300) * 100;
+                        let level = '';
+                        if (percentage <= 10) level = 'Minimal pelvic floor disability';
+                        else if (percentage <= 30) level = 'Mild pelvic floor disability';
+                        else if (percentage <= 50) level = 'Moderate pelvic floor disability';
+                        else if (percentage <= 70) level = 'Severe pelvic floor disability';
+                        else level = 'Very severe pelvic floor disability';
+                        return { percentage: percentage.toFixed(1), level };
+                    }
+                },
+                'PGQ': {
+                    name: 'Pelvic Girdle Questionnaire',
+                    maxScore: 75, minScore: 25, questions: 25,
+                    interpretation: (score) => {
+                        const percentage = ((score - 25) / 50) * 100;
+                        let level = '';
+                        if (percentage <= 20) level = 'Minimal pelvic girdle dysfunction';
+                        else if (percentage <= 40) level = 'Mild pelvic girdle dysfunction';
+                        else if (percentage <= 60) level = 'Moderate pelvic girdle dysfunction';
+                        else if (percentage <= 80) level = 'Severe pelvic girdle dysfunction';
+                        else level = 'Very severe pelvic girdle dysfunction';
+                        return { percentage: percentage.toFixed(1), level };
+                    }
+                },
+                'UIQ': {
+                    name: 'Urinary Incontinence Questionnaire',
+                    maxScore: 91, minScore: 0, questions: 21,
+                    interpretation: (score) => {
+                        const percentage = (score / 91) * 100;
+                        let level = '';
+                        if (percentage <= 10) level = 'Minimal urinary incontinence impact';
+                        else if (percentage <= 25) level = 'Mild urinary incontinence impact';
+                        else if (percentage <= 50) level = 'Moderate urinary incontinence impact';
+                        else if (percentage <= 75) level = 'Severe urinary incontinence impact';
+                        else level = 'Very severe urinary incontinence impact';
+                        return { percentage: percentage.toFixed(1), level };
+                    }
+                },
+                'FSFI6': {
+                    name: 'Female Sexual Function Index - 6 Item',
+                    maxScore: 30, minScore: 6, questions: 6,
+                    interpretation: (score) => {
+                        let level = '';
+                        if (score >= 23) level = 'Normal sexual function - Low risk of sexual dysfunction';
+                        else if (score >= 19) level = 'Mild sexual dysfunction - Some areas of concern';
+                        else if (score >= 15) level = 'Moderate sexual dysfunction - Significant functional impairment';
+                        else level = 'Severe sexual dysfunction - Major functional impairment';
+                        const percentage = ((30 - score) / 24) * 100;
+                        return { percentage: percentage.toFixed(1), level };
+                    }
+                }
+            };
+
+            const calculatePFDIScore = () => {
+                if (selectedTest !== 'PFDI') return null;
+
+                const tool = assessmentTools[selectedTest];
+                const subscaleScores = {};
+                let totalScore = 0;
+
+                Object.entries(tool.subscales).forEach(([subscaleName, subscale]) => {
+                    const subscaleQuestions = subscale.questions;
+                    const answeredScores = subscaleQuestions
+                        .map(q => individualScores[q])
+                        .filter(score => score !== undefined && score !== null && !isNaN(score));
+                    
+                    if (answeredScores.length > 0) {
+                        const mean = answeredScores.reduce((sum, score) => sum + parseFloat(score), 0) / answeredScores.length;
+                        const subscaleScore = Math.round((mean * 25) * 10) / 10;
+                        subscaleScores[subscaleName] = subscaleScore;
+                        totalScore += subscaleScore;
+                    } else {
+                        subscaleScores[subscaleName] = 0;
+                    }
+                });
+
+                return { subscaleScores, totalScore: Math.round(totalScore * 10) / 10 };
+            };
+
+            const handleScoreChange = (value) => {
+                const numValue = parseFloat(value);
+                setScores({ total: numValue });
+                
+                if (selectedTest && !isNaN(numValue)) {
+                    const tool = assessmentTools[selectedTest];
+                    if (numValue >= tool.minScore && numValue <= tool.maxScore) {
+                        const result = tool.interpretation(numValue);
+                        setResults(result);
+                    } else {
+                        setResults(null);
+                    }
+                }
+            };
+
+            const handleIndividualScoreChange = (questionIndex, value) => {
+                const numValue = value === '' ? undefined : parseFloat(value);
+                setIndividualScores(prev => {
+                    if (numValue === undefined) {
+                        const newScores = {...prev};
+                        delete newScores[questionIndex];
+                        return newScores;
+                    }
+                    return {
+                        ...prev,
+                        [questionIndex]: numValue
+                    };
+                });
+            };
+
+            const calculateTotalFromIndividual = () => {
+                if (selectedTest === 'PFDI') {
+                    const pfdiResult = calculatePFDIScore();
+                    if (pfdiResult) {
+                        setScores({ 
+                            total: pfdiResult.totalScore,
+                            subscales: pfdiResult.subscaleScores 
+                        });
+                        
+                        const tool = assessmentTools[selectedTest];
+                        if (pfdiResult.totalScore >= tool.minScore && pfdiResult.totalScore <= tool.maxScore) {
+                            const result = tool.interpretation(pfdiResult.totalScore);
+                            setResults({...result, subscales: pfdiResult.subscaleScores});
+                        }
+                    }
+                } else {
+                    const total = Object.values(individualScores).reduce((sum, score) => sum + (score || 0), 0);
+                    setScores({ total });
+                    
+                    if (selectedTest && total >= 0) {
+                        const tool = assessmentTools[selectedTest];
+                        if (total >= tool.minScore && total <= tool.maxScore) {
+                            const result = tool.interpretation(total);
+                            setResults(result);
+                        } else {
+                            setResults(null);
+                        }
+                    }
+                }
+            };
+
+            const resetCalculator = () => {
+                setSelectedTest('');
+                setScores({});
+                setResults(null);
+                setIndividualScores({});
+                setCalculatorMode('direct');
+            };
+
+            const getQuickReference = () => {
+                if (selectedTest === 'APFQ') {
+                    return (
+                        <>
+                            <p><strong>Minimal dysfunction:</strong> 42-67 points</p>
+                            <p><strong>Mild dysfunction:</strong> 68-92 points</p>
+                            <p><strong>Moderate dysfunction:</strong> 93-117 points</p>
+                            <p><strong>Severe dysfunction:</strong> 118-142 points</p>
+                            <p><strong>Very severe dysfunction:</strong> 143-168 points</p>
+                        </>
+                    );
+                } else if (selectedTest === 'FSFI6') {
+                    return (
+                        <>
+                            <p><strong>Normal function:</strong> 23-30 points</p>
+                            <p><strong>Mild dysfunction:</strong> 19-22 points</p>
+                            <p><strong>Moderate dysfunction:</strong> 15-18 points</p>
+                            <p><strong>Severe dysfunction:</strong> 6-14 points</p>
+                        </>
+                    );
+                } else if (selectedTest === 'PFDI') {
+                    return (
+                        <>
+                            <p><strong>Minimal disability:</strong> 0-30 points</p>
+                            <p><strong>Mild disability:</strong> 31-90 points</p>
+                            <p><strong>Moderate disability:</strong> 91-150 points</p>
+                            <p><strong>Severe disability:</strong> 151-210 points</p>
+                            <p><strong>Very severe disability:</strong> 211-300 points</p>
+                            <div className="mt-3 p-3 bg-blue-50 rounded">
+                                <p className="text-xs text-blue-800"><strong>Scoring:</strong> Each subscale scored 0-4, mean × 25, then summed</p>
+                                <p className="text-xs text-blue-800">POPDI-6 (Q1-6) + CRADI-8 (Q7-14) + UDI-6 (Q15-20)</p>
+                            </div>
+                        </>
+                    );
+                } else if (selectedTest === 'UIQ') {
+                    return (
+                        <>
+                            <p><strong>Minimal impact:</strong> 0-9 points</p>
+                            <p><strong>Mild impact:</strong> 10-23 points</p>
+                            <p><strong>Moderate impact:</strong> 24-45 points</p>
+                            <p><strong>Severe impact:</strong> 46-68 points</p>
+                            <p><strong>Very severe impact:</strong> 69-91 points</p>
+                        </>
+                    );
+                } else {
+                    return (
+                        <>
+                            <p><strong>Minimal Impairment:</strong> 0-20%</p>
+                            <p><strong>Mild Impairment:</strong> 21-40%</p>
+                            <p><strong>Moderate Impairment:</strong> 41-60%</p>
+                            <p><strong>Severe Impairment:</strong> 61-80%</p>
+                            <p><strong>Very Severe Impairment:</strong> 81-100%</p>
+                        </>
+                    );
+                }
+            };
+
+            React.useEffect(() => {
+                if (calculatorMode === 'calculator') {
+                    calculateTotalFromIndividual();
+                }
+            }, [individualScores, selectedTest, calculatorMode]);
+
+            const renderCalculatorMode = () => {
+                if (!selectedTest) return null;
+
+                const tool = assessmentTools[selectedTest];
+
+                if (selectedTest === 'PFDI') {
+                    return (
+                        <div className="space-y-4">
+                            <div className="bg-purple-50 p-4 rounded-lg">
+                                <h4 className="font-semibold text-purple-800 mb-2">PFDI-20 Individual Question Scores</h4>
+                                <p className="text-sm text-purple-700 mb-4">
+                                    Enter scores for each question (0-4). Subscale scores are calculated as mean × 25.
+                                </p>
+                            </div>
+                            
+                            {Object.entries(tool.subscales).map(([subscaleName, subscale]) => (
+                                <div key={subscaleName} className="bg-white p-4 rounded-lg border">
+                                    <h5 className="font-medium text-gray-800 mb-3">{subscale.name}</h5>
+                                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
+                                        {subscale.questions.map(questionNum => (
+                                            <div key={questionNum} className="flex flex-col">
+                                                <label className="text-xs font-medium text-gray-600 mb-1">
+                                                    Q{questionNum}
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={individualScores[questionNum] || ''}
+                                                    onChange={(e) => handleIndividualScoreChange(questionNum, e.target.value)}
+                                                    className="w-full p-2 border border-gray-300 rounded text-sm text-center"
+                                                    min="0"
+                                                    max="4"
+                                                    step="1"
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="mt-2 text-right">
+                                        <span className="text-sm font-medium text-gray-600">
+                                            Subscale Score: {scores.subscales?.[subscaleName]?.toFixed(1) || '0.0'}
+                                        </span>
+                                    </div>
+                                </div>
+                            ))}
+                            
+                            <div className="bg-green-50 p-4 rounded-lg">
+                                <div className="flex justify-between items-center">
+                                    <span className="font-semibold text-green-800">Total PFDI-20 Score:</span>
+                                    <span className="text-xl font-bold text-green-800">
+                                        {scores.total?.toFixed(1) || '0.0'}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                }
+
+                const questions = Array.from({ length: tool.questions }, (_, i) => i + 1);
+
+                return (
+                    <div className="space-y-4">
+                        <div className="bg-purple-50 p-4 rounded-lg">
+                            <h4 className="font-semibold text-purple-800 mb-2">Individual Question Scores</h4>
+                            <p className="text-sm text-purple-700 mb-4">
+                                Enter the score for each question/item. The total will be calculated automatically.
+                            </p>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-96 overflow-y-auto">
+                            {questions.map(questionNum => (
+                                <div key={questionNum} className="flex flex-col">
+                                    <label className="text-xs font-medium text-gray-600 mb-1">
+                                        Q{questionNum}
+                                    </label>
+                                    <input
+                                        type="number"
+                                        value={individualScores[questionNum] || ''}
+                                        onChange={(e) => handleIndividualScoreChange(questionNum, e.target.value)}
+                                        className="w-full p-2 border border-gray-300 rounded text-sm text-center"
+                                        min="0"
+                                        step="0.1"
+                                    />
+                                </div>
+                            ))}
+                        </div>
+                        
+                        <div className="bg-green-50 p-4 rounded-lg">
+                            <div className="flex justify-between items-center">
+                                <span className="font-semibold text-green-800">Calculated Total:</span>
+                                <span className="text-xl font-bold text-green-800">
+                                    {Object.values(individualScores).reduce((sum, score) => sum + (score || 0), 0).toFixed(1)}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                );
+            };
+
+            return (
+                <div className="max-w-6xl mx-auto p-6 bg-gradient-to-br from-pink-50 to-purple-100 min-h-screen">
+                    <div className="bg-white rounded-2xl shadow-xl p-8">
+                        <div className="flex items-center justify-between mb-8">
+                            <div className="flex items-center gap-3">
+                                <Heart />
+                                <h1 className="text-3xl font-bold text-gray-800">Pelvic Health Outcome Calculator</h1>
+                            </div>
+                            <button
+                                onClick={resetCalculator}
+                                className="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                            >
+                                <RotateCcw />
+                                Reset
+                            </button>
+                        </div>
+
+                        <div className="grid lg:grid-cols-3 gap-8">
+                            <div className="lg:col-span-2 space-y-6">
+                                <div>
+                                    <label className="block text-lg font-semibold text-gray-700 mb-3">
+                                        Select Assessment Tool
+                                    </label>
+                                    <select
+                                        value={selectedTest}
+                                        onChange={(e) => {
+                                            setSelectedTest(e.target.value);
+                                            setScores({});
+                                            setResults(null);
+                                            setIndividualScores({});
+                                        }}
+                                        className="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-pink-500 focus:outline-none text-lg"
+                                    >
+                                        <option value="">Choose an assessment...</option>
+                                        {Object.entries(assessmentTools).map(([key, tool]) => (
+                                            <option key={key} value={key}>
+                                                {tool.name}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                {selectedTest && (
+                                    <div className="bg-pink-50 p-6 rounded-lg">
+                                        <h3 className="font-semibold text-pink-800 mb-3">
+                                            {assessmentTools[selectedTest].name}
+                                        </h3>
+                                        <div className="space-y-2 text-sm text-pink-700">
+                                            <p><strong>Questions/Items:</strong> {assessmentTools[selectedTest].questions}</p>
+                                            <p><strong>Score Range:</strong> {assessmentTools[selectedTest].minScore} - {assessmentTools[selectedTest].maxScore}</p>
+                                        </div>
+                                        
+                                        {selectedTest === 'UIQ' && (
+                                            <div className="mt-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                                                <p className="text-sm text-blue-800">
+                                                    <strong>Scoring Note:</strong> This 21-question assessment covers urinary leakage frequency and severity, 
+                                                    protection usage, quality of life impact, and urinary control patterns.
+                                                </p>
+                                            </div>
+                                        )}
+                                        
+                                        {selectedTest === 'PFDI' && (
+                                            <div className="mt-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400">
+                                                <p className="text-sm text-blue-800">
+                                                    <strong>Scoring Note:</strong> PFDI-20 consists of 3 subscales: POPDI-6 (Q1-6), CRADI-8 (Q7-14), and UDI-6 (Q15-20). 
+                                                    Each question scored 0-4. Subscale score = mean of answered items × 25. Total = sum of 3 subscales.
+                                                </p>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+
+                                {selectedTest && (
+                                    <div>
+                                        <div className="flex gap-4 mb-4">
+                                            <button
+                                                onClick={() => setCalculatorMode('direct')}
+                                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                                                    calculatorMode === 'direct' 
+                                                        ? 'bg-pink-500 text-white' 
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                <FileText />
+                                                Enter Total
+                                            </button>
+                                            <button
+                                                onClick={() => setCalculatorMode('calculator')}
+                                                className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+                                                    calculatorMode === 'calculator' 
+                                                        ? 'bg-pink-500 text-white' 
+                                                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                                }`}
+                                            >
+                                                <Calculator />
+                                                Calculator Mode
+                                            </button>
+                                        </div>
+
+                                        {calculatorMode === 'direct' ? (
+                                            <div>
+                                                <label className="block text-lg font-semibold text-gray-700 mb-3">
+                                                    Total Score
+                                                </label>
+                                                <input
+                                                    type="number"
+                                                    value={scores.total || ''}
+                                                    onChange={(e) => handleScoreChange(e.target.value)}
+                                                    placeholder={`Enter score (${assessmentTools[selectedTest].minScore}-${assessmentTools[selectedTest].maxScore})`}
+                                                    min={assessmentTools[selectedTest].minScore}
+                                                    max={assessmentTools[selectedTest].maxScore}
+                                                    step="0.1"
+                                                    className="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-pink-500 focus:outline-none text-xl text-center font-semibold"
+                                                />
+                                            </div>
+                                        ) : (
+                                            renderCalculatorMode()
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+
+                            <div className="space-y-6">
+                                {results && (
+                                    <div className="bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-xl border-2 border-green-200">
+                                        <div className="flex items-center gap-2 mb-4">
+                                            <FileText />
+                                            <h3 className="text-xl font-bold text-green-800">Results</h3>
+                                        </div>
+                                        
+                                        <div className="space-y-4">
+                                            <div className="bg-white p-4 rounded-lg">
+                                                <div className="text-center">
+                                                    <div className="text-3xl font-bold text-gray-800 mb-2">
+                                                        {results.percentage}%
+                                                    </div>
+                                                    <div className="text-lg text-gray-600">
+                                                        {selectedTest === 'FIQL' ? 'Quality of Life Impact' : 
+                                                         selectedTest === 'FSFI6' ? 'Sexual Function Impact' :
+                                                         selectedTest === 'UIQ' ? 'Urinary Incontinence Impact' :
+                                                         'Symptom Severity Level'}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="bg-white p-4 rounded-lg">
+                                                <div className="text-center">
+                                                    <div className="text-lg font-semibold text-gray-800">
+                                                        {results.level}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            {selectedTest === 'PFDI' && results.subscales && (
+                                                <div className="bg-white p-4 rounded-lg">
+                                                    <h4 className="font-medium text-gray-800 mb-3">Subscale Scores</h4>
+                                                    <div className="space-y-2 text-sm">
+                                                        <div className="flex justify-between">
+                                                            <span>POPDI-6:</span>
+                                                            <span className="font-medium">{results.subscales['POPDI-6']?.toFixed(1) || '0.0'}</span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span>CRADI-8:</span>
+                                                            <span className="font-medium">{results.subscales['CRADI-8']?.toFixed(1) || '0.0'}</span>
+                                                        </div>
+                                                        <div className="flex justify-between">
+                                                            <span>UDI-6:</span>
+                                                            <span className="font-medium">{results.subscales['UDI-6']?.toFixed(1) || '0.0'}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </div>
+                                )}
+
+                                {selectedTest && !results && scores.total !== undefined && (
+                                    <div className="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
+                                        <p className="text-yellow-800">
+                                            Please enter a valid score between {assessmentTools[selectedTest].minScore} and {assessmentTools[selectedTest].maxScore}.
+                                        </p>
+                                    </div>
+                                )}
+
+                                <div className="bg-gray-50 p-6 rounded-lg">
+                                    <h3 className="font-semibold text-gray-800 mb-3">Quick Reference</h3>
+                                    <div className="text-sm text-gray-600 space-y-2">
+                                        {getQuickReference()}
+                                    </div>
+                                    <p className="text-xs text-gray-500 mt-4">
+                                        * Interpretation may vary by specific assessment tool and clinical context
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="mt-8 p-4 bg-pink-50 rounded-lg">
+                            <p className="text-sm text-pink-800">
+                                <strong>Note:</strong> This calculator is for educational and clinical reference purposes in pelvic health assessment. 
+                                Always refer to the original assessment guidelines and consider clinical context when interpreting results. 
+                                These tools should be used by qualified healthcare professionals.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        ReactDOM.render(<PelvicHealthCalculator />, document.getElementById('root'));
+    </script>
+</body>
+</html>
