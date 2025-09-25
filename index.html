@@ -3,1076 +3,819 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bladder & Bowel Tracker</title>
+    <title>Pelvic Health Outcome Calculator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Reset and base styles */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f3f4f6;
-            min-height: 100vh;
-            padding: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 768px;
-            background: white;
-            border-radius: 16px;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-            overflow: hidden;
-        }
-
-        /* Header */
-        .header {
-            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
-            color: white;
-            padding: 32px 48px;
-            text-align: center;
-        }
-
-        .header h1 {
-            font-size: 32px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        /* Main content */
-        .main {
-            padding: 32px 48px;
-        }
-
-        /* Patient Info Section */
-        .patient-section {
-            margin-bottom: 32px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid #e5e7eb;
-        }
-
-        .patient-section h2 {
-            font-size: 24px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 16px;
-        }
-
-        .patient-form {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .form-group label {
-            font-size: 14px;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-
-        .form-group input {
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 16px;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        /* Tracker Form */
-        .tracker-form {
-            display: grid;
-            gap: 24px;
-        }
-
-        .form-section {
-            display: grid;
-            gap: 16px;
-        }
-
-        .form-section select {
-            padding: 12px;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 16px;
-            background: white;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .form-section select:focus {
-            outline: none;
-            border-color: #4f46e5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-
-        /* Time section */
-        .time-section {
-            background: #f9fafb;
-            padding: 16px;
-            border-radius: 12px;
-            border: 1px solid #e5e7eb;
-        }
-
-        .time-section h3 {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1f2937;
-            margin-bottom: 16px;
-        }
-
-        .time-options {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-
-        .time-option {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .time-option label {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-
-        .time-display {
-            font-size: 14px;
-            color: #6b7280;
-            background: white;
-            padding: 8px;
-            border: 1px solid #e5e7eb;
-            border-radius: 4px;
-        }
-
-        .manual-time {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-        }
-
-        /* Entry fields */
-        .entry-fields {
-            display: grid;
-            gap: 24px;
-        }
-
-        .field-group h4 {
-            font-size: 14px;
-            font-weight: 500;
-            color: #374151;
-            margin-bottom: 8px;
-        }
-
-        .radio-group {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
-            gap: 8px;
-        }
-
-        .radio-option {
-            position: relative;
-        }
-
-        .radio-option input[type="radio"] {
-            position: absolute;
-            opacity: 0;
-            pointer-events: none;
-        }
-
-        .radio-option span {
-            display: block;
-            padding: 8px 16px;
-            text-align: center;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.2s;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .radio-option span:hover {
-            background: #f3f4f6;
-        }
-
-        .radio-option input[type="radio"]:checked + span {
-            background: #4f46e5;
-            color: white;
-            border-color: #4f46e5;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: center;
-        }
-
-        .btn-primary {
-            background: #4f46e5;
-            color: white;
-            box-shadow: 0 10px 25px -5px rgba(79, 70, 229, 0.4);
-        }
-
-        .btn-primary:hover {
-            background: #3730a3;
-            transform: translateY(-1px);
-        }
-
-        .btn-secondary {
-            background: #e5e7eb;
-            color: #374151;
-        }
-
-        .btn-secondary:hover {
-            background: #d1d5db;
-        }
-
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-
-        .btn-danger:hover {
-            background: #dc2626;
-        }
-
-        /* Hidden fields */
-        .hidden {
-            display: none;
-        }
-
-        /* History section */
-        .history-section {
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid #e5e7eb;
-        }
-
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-
-        .history-header h2 {
-            font-size: 24px;
-            font-weight: 600;
-            color: #1f2937;
-        }
-
-        .history-controls {
-            display: flex;
-            gap: 8px;
-        }
-
-        .btn-small {
-            padding: 8px 16px;
-            font-size: 14px;
-        }
-
-        /* Entry cards */
-        .entry-card {
-            background: #f9fafb;
-            padding: 16px;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            border: 1px solid #e5e7eb;
-            margin-bottom: 16px;
-        }
-
-        .entry-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 8px;
-        }
-
-        .entry-type {
-            font-size: 18px;
-            font-weight: 600;
-            color: #4f46e5;
-            text-transform: capitalize;
-        }
-
-        .entry-time {
-            font-size: 14px;
-            color: #6b7280;
-        }
-
-        .entry-details {
-            color: #6b7280;
-            font-size: 14px;
-        }
-
-        .entry-details p {
-            margin-bottom: 4px;
-        }
-
-        .entry-details strong {
-            color: #374151;
-        }
-
-        .delete-btn {
-            margin-top: 16px;
-            width: 100%;
-        }
-
-        /* Message box */
-        .message-container {
-            position: fixed;
-            top: 16px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 1000;
-        }
-
-        .message-box {
-            padding: 8px 16px;
-            border-radius: 24px;
-            color: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            font-size: 14px;
-            animation: fadein 0.5s, fadeout 0.5s 2.5s;
-        }
-
-        .message-success {
-            background: #10b981;
-        }
-
-        .message-error {
-            background: #ef4444;
-        }
-
-        @keyframes fadein {
-            from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-        }
-
-        @keyframes fadeout {
-            from { opacity: 1; }
-            to { opacity: 0; }
-        }
-
-        /* Responsive design */
-        @media (min-width: 640px) {
-            .patient-form {
-                grid-template-columns: 1fr 1fr;
-                gap: 16px;
-            }
-
-            .time-options {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .main {
-                padding: 24px;
-            }
-
-            .header {
-                padding: 24px;
-            }
-
-            .header h1 {
-                font-size: 24px;
-            }
-
-            .history-header {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 16px;
-            }
-
-            .history-controls {
-                width: 100%;
-            }
-
-            .history-controls button {
-                flex: 1;
-            }
-        }
+        .lucide { width: 24px; height: 24px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
     </style>
 </head>
-<body>
-    <div id="message-container" class="message-container"></div>
-
-    <div class="container">
-        <header class="header">
-            <h1>Bladder & Bowel Tracker</h1>
-        </header>
-        
-        <main class="main">
-            <div class="patient-section">
-                <h2>Patient Information</h2>
-                <form id="patientInfoForm" class="patient-form">
-                    <div class="form-group">
-                        <label for="patientName">Full Name</label>
-                        <input type="text" id="patientName" placeholder="e.g., Jane Doe">
-                    </div>
-                    <div class="form-group">
-                        <label for="patientDOB">Date of Birth</label>
-                        <input type="date" id="patientDOB">
-                    </div>
-                    <button type="submit" id="savePatientInfoBtn" class="btn btn-primary">
-                        Save Information
-                    </button>
-                </form>
-            </div>
-
-            <form id="trackerForm" class="tracker-form">
-                <div class="form-section">
-                    <div class="form-group">
-                        <label for="entryType">Entry Type</label>
-                        <select id="entryType">
-                            <option value="urination">Urination</option>
-                            <option value="bowelMovement">Bowel Movement</option>
-                            <option value="beverage">Beverage</option>
-                        </select>
-                    </div>
+<body class="bg-gradient-to-br from-pink-50 to-purple-100 min-h-screen p-6">
+    <div class="max-w-6xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-xl p-8">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-3">
+                    <svg class="lucide text-pink-600" viewBox="0 0 24 24">
+                        <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.29 1.51 4.04 3 5.5Z"/>
+                    </svg>
+                    <h1 class="text-3xl font-bold text-gray-800">Pelvic Health Outcome Calculator</h1>
                 </div>
-
-                <div class="time-section">
-                    <h3>Time & Date</h3>
-                    <div class="time-options">
-                        <div class="time-option">
-                            <label>
-                                <input type="radio" name="timeMode" value="now" checked>
-                                Use current time
-                            </label>
-                            <div id="currentTimeDisplay" class="time-display">
-                                Current: <span id="currentTimeText"></span>
-                            </div>
-                        </div>
-                        <div class="time-option">
-                            <label>
-                                <input type="radio" name="timeMode" value="manual">
-                                Enter specific time
-                            </label>
-                            <div class="manual-time">
-                                <input type="date" id="manualDate" disabled>
-                                <input type="time" id="manualTime" disabled>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="urination-fields" class="entry-fields">
-                    <div class="field-group">
-                        <h4>Urge</h4>
-                        <div class="radio-group">
-                            <div class="radio-option">
-                                <input type="radio" name="urge" value="None" id="urge-none" checked>
-                                <span>None</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="urge" value="Weak" id="urge-weak">
-                                <span>Weak</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="urge" value="Medium" id="urge-medium">
-                                <span>Medium</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="urge" value="Strong" id="urge-strong">
-                                <span>Strong</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="urinationAmount">Urination Amount (oz)</label>
-                        <input type="number" id="urinationAmount" placeholder="e.g., 8">
-                    </div>
-                    <div class="field-group">
-                        <h4>Leakage</h4>
-                        <div class="radio-group">
-                            <div class="radio-option">
-                                <input type="radio" name="urinationLeakage" value="Yes" id="urine-leak-yes">
-                                <span>Yes</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="urinationLeakage" value="No" id="urine-leak-no" checked>
-                                <span>No</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="urinationLeakageActivityContainer" class="form-group hidden">
-                        <label for="urinationLeakageActivity">What you were doing when leakage occurred?</label>
-                        <input type="text" id="urinationLeakageActivity" placeholder="e.g., coughing, running, lifting">
-                    </div>
-                    <div class="field-group">
-                        <h4>Pad/Brief/Guard Usage</h4>
-                        <div class="radio-group">
-                            <div class="radio-option">
-                                <input type="radio" name="urinationPadUsage" value="Not changed" id="urine-pad-none" checked>
-                                <span>Not changed</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="urinationPadUsage" value="Damp" id="urine-pad-damp">
-                                <span>Damp</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="urinationPadUsage" value="Wet" id="urine-pad-wet">
-                                <span>Wet</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="urinationPadUsage" value="Soaked" id="urine-pad-soaked">
-                                <span>Soaked</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="bowel-fields" class="entry-fields hidden">
-                    <div class="form-group">
-                        <label for="consistency">Bowel Movement Type (Bristol Stool Chart)</label>
-                        <select id="consistency">
-                            <option value="Type 1: Separate hard lumps">Type 1 - Separate hard lumps, like nuts (hard to pass)</option>
-                            <option value="Type 2: Lumpy sausage">Type 2 - Sausage-shaped but lumpy</option>
-                            <option value="Type 3: Sausage with cracks">Type 3 - Like a sausage but with cracks on surface</option>
-                            <option value="Type 4: Smooth, soft sausage" selected>Type 4 - Like a sausage or snake, smooth and soft (normal)</option>
-                            <option value="Type 5: Soft blobs">Type 5 - Soft blobs with clear cut edges</option>
-                            <option value="Type 6: Mushy">Type 6 - Fluffy pieces with ragged edges, mushy</option>
-                            <option value="Type 7: Liquid">Type 7 - Watery, no solid pieces, entirely liquid</option>
-                        </select>
-                    </div>
-                    <div class="field-group">
-                        <h4>Urgency</h4>
-                        <div class="radio-group">
-                            <div class="radio-option">
-                                <input type="radio" name="urgency" value="None" id="urgency-none" checked>
-                                <span>None</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="urgency" value="Weak" id="urgency-weak">
-                                <span>Weak</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="urgency" value="Medium" id="urgency-medium">
-                                <span>Medium</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="urgency" value="Strong" id="urgency-strong">
-                                <span>Strong</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="field-group">
-                        <h4>Leakage</h4>
-                        <div class="radio-group">
-                            <div class="radio-option">
-                                <input type="radio" name="bowelLeakage" value="Yes" id="bowel-leak-yes">
-                                <span>Yes</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="bowelLeakage" value="No" id="bowel-leak-no" checked>
-                                <span>No</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="bowelLeakageActivityContainer" class="form-group hidden">
-                        <label for="bowelLeakageActivity">What you were doing when leakage occurred?</label>
-                        <input type="text" id="bowelLeakageActivity" placeholder="e.g., coughing, running, lifting">
-                    </div>
-                    <div class="field-group">
-                        <h4>Pad/Brief/Guard Usage</h4>
-                        <div class="radio-group">
-                            <div class="radio-option">
-                                <input type="radio" name="bowelPadUsage" value="Not changed" id="bowel-pad-none" checked>
-                                <span>Not changed</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="bowelPadUsage" value="Damp" id="bowel-pad-damp">
-                                <span>Damp</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="bowelPadUsage" value="Wet" id="bowel-pad-wet">
-                                <span>Wet</span>
-                            </div>
-                            <div class="radio-option">
-                                <input type="radio" name="bowelPadUsage" value="Soaked" id="bowel-pad-soaked">
-                                <span>Soaked</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="beverage-fields" class="entry-fields hidden">
-                    <div class="form-group">
-                        <label for="beverageType">Beverage Type</label>
-                        <input type="text" id="beverageType" placeholder="e.g., Water, coffee, soda">
-                    </div>
-                    <div class="form-group">
-                        <label for="beverageAmount">Beverage Amount (oz)</label>
-                        <input type="number" id="beverageAmount" placeholder="e.g., 12">
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn btn-primary">
-                    Add Entry
+                <button onclick="resetCalculator()" class="flex items-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors">
+                    <svg class="lucide" viewBox="0 0 24 24">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                    Reset
                 </button>
-            </form>
+            </div>
 
-            <div class="history-section">
-                <div class="history-header">
-                    <h2>Entry History</h2>
-                    <div class="history-controls">
-                        <button id="exportCsvBtn" class="btn btn-secondary btn-small">
-                            Export CSV
-                        </button>
-                        <button id="clearDataBtn" class="btn btn-danger btn-small">
-                            Clear All Data
-                        </button>
+            <div class="grid lg:grid-cols-3 gap-8">
+                <div class="lg:col-span-2 space-y-6">
+                    <div>
+                        <label class="block text-lg font-semibold text-gray-700 mb-3">
+                            Select Assessment Tool
+                        </label>
+                        <select id="testSelector" onchange="handleTestChange()" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-pink-500 focus:outline-none text-lg">
+                            <option value="">Choose an assessment...</option>
+                            <option value="APFQ">Australian Pelvic Floor Questionnaire</option>
+                            <option value="PAC-SYM">Patient Assessment of Constipation Symptoms</option>
+                            <option value="FIQL">Fecal Incontinence Quality of Life Scale</option>
+                            <option value="MENQOL">Menopause-Specific Quality of Life</option>
+                            <option value="PFDI">Pelvic Floor Disability Index (PFDI-20)</option>
+                            <option value="PGQ">Pelvic Girdle Questionnaire</option>
+                            <option value="UIQ">Urinary Incontinence Questionnaire</option>
+                            <option value="FSFI6">Female Sexual Function Index - 6 Item</option>
+                        </select>
+                    </div>
+
+                    <div id="testInfo" style="display: none;" class="bg-pink-50 p-6 rounded-lg">
+                        <h3 id="testTitle" class="font-semibold text-pink-800 mb-3"></h3>
+                        <div class="space-y-2 text-sm text-pink-700">
+                            <p><strong>Questions/Items:</strong> <span id="testQuestions"></span></p>
+                            <p><strong>Score Range:</strong> <span id="testRange"></span></p>
+                        </div>
+                        <div id="testNote" class="mt-4 p-4 bg-blue-50 rounded-lg border-l-4 border-blue-400" style="display: none;">
+                            <p id="testNoteText" class="text-sm text-blue-800"></p>
+                        </div>
+                    </div>
+
+                    <div id="calculatorSection" style="display: none;">
+                        <div class="flex gap-4 mb-4">
+                            <button onclick="setCalculatorMode('direct')" id="directModeBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200">
+                                <svg class="lucide" viewBox="0 0 24 24">
+                                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                                    <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                                    <line x1="10" x2="16" y1="13" y2="13"/>
+                                    <line x1="10" x2="16" y1="17" y2="17"/>
+                                    <polyline points="10,9 9,9 8,9"/>
+                                </svg>
+                                Enter Total
+                            </button>
+                            <button onclick="setCalculatorMode('calculator')" id="calculatorModeBtn" class="flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200">
+                                <svg class="lucide" viewBox="0 0 24 24">
+                                    <rect width="16" height="20" x="4" y="2" rx="2" ry="2"/>
+                                    <line x1="8" x2="16" y1="6" y2="6"/>
+                                    <line x1="8" x2="16" y1="10" y2="10"/>
+                                    <line x1="8" x2="16" y1="14" y2="14"/>
+                                    <line x1="8" x2="16" y1="18" y2="18"/>
+                                </svg>
+                                Calculator Mode
+                            </button>
+                        </div>
+
+                        <div id="directMode">
+                            <label class="block text-lg font-semibold text-gray-700 mb-3">
+                                Total Score
+                            </label>
+                            <input type="number" id="totalScore" oninput="calculateResult()" placeholder="Enter total score" step="0.1" class="w-full p-4 border-2 border-gray-300 rounded-lg focus:border-pink-500 focus:outline-none text-xl text-center font-semibold">
+                        </div>
+
+                        <div id="calculatorMode" style="display: none;">
+                            <div id="pfdiCalculator" style="display: none;" class="space-y-4">
+                                <div class="bg-purple-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-purple-800 mb-2">PFDI-20 Individual Question Scores</h4>
+                                    <p class="text-sm text-purple-700 mb-4">
+                                        Enter scores for each question (0-4). For each subscale: sum answered items ÷ number of answered items × 25 = subscale score.
+                                    </p>
+                                </div>
+                                
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h5 class="font-medium text-gray-800 mb-3">POPDI-6: Pelvic Organ Prolapse Distress Inventory</h5>
+                                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-3" id="popdiQuestions">
+                                        <!-- Questions 1-6 -->
+                                    </div>
+                                    <div class="mt-2 text-right">
+                                        <span class="text-sm font-medium text-gray-600">
+                                            Subscale Score: <span id="popdiScore">0.0</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h5 class="font-medium text-gray-800 mb-3">CRADI-8: Colorectal-Anal Distress Inventory</h5>
+                                    <div class="grid grid-cols-4 sm:grid-cols-8 gap-3" id="cradiQuestions">
+                                        <!-- Questions 7-14 -->
+                                    </div>
+                                    <div class="mt-2 text-right">
+                                        <span class="text-sm font-medium text-gray-600">
+                                            Subscale Score: <span id="cradiScore">0.0</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h5 class="font-medium text-gray-800 mb-3">UDI-6: Urinary Distress Inventory</h5>
+                                    <div class="grid grid-cols-3 sm:grid-cols-6 gap-3" id="udiQuestions">
+                                        <!-- Questions 15-20 -->
+                                    </div>
+                                    <div class="mt-2 text-right">
+                                        <span class="text-sm font-medium text-gray-600">
+                                            Subscale Score: <span id="udiScore">0.0</span>
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-green-50 p-4 rounded-lg">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-semibold text-green-800">Total PFDI-20 Score:</span>
+                                        <span id="pfdiTotalScore" class="text-xl font-bold text-green-800">0.0</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div id="generalCalculator" style="display: none;" class="space-y-4">
+                                <div class="bg-purple-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-purple-800 mb-2">Individual Question Scores</h4>
+                                    <p class="text-sm text-purple-700 mb-4">
+                                        Enter the score for each question/item. The total will be calculated automatically.
+                                    </p>
+                                </div>
+                                
+                                <div id="questionInputs" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3 max-h-96 overflow-y-auto">
+                                    <!-- Question inputs will be generated here -->
+                                </div>
+                                
+                                <div class="bg-green-50 p-4 rounded-lg">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-semibold text-green-800">Calculated Total:</span>
+                                        <span id="generalTotalScore" class="text-xl font-bold text-green-800">0.0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div id="entriesList">
-                    <!-- Entries will be dynamically inserted here -->
+
+                <div class="space-y-6">
+                    <div id="resultsSection" style="display: none;" class="bg-gradient-to-br from-green-50 to-emerald-100 p-6 rounded-xl border-2 border-green-200">
+                        <div class="flex items-center gap-2 mb-4">
+                            <svg class="lucide text-green-800" viewBox="0 0 24 24">
+                                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/>
+                                <path d="M14 2v4a2 2 0 0 0 2 2h4"/>
+                                <line x1="10" x2="16" y1="13" y2="13"/>
+                                <line x1="10" x2="16" y1="17" y2="17"/>
+                                <polyline points="10,9 9,9 8,9"/>
+                            </svg>
+                            <h3 class="text-xl font-bold text-green-800">Results</h3>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div class="bg-white p-4 rounded-lg">
+                                <div class="text-center">
+                                    <div id="percentageScore" class="text-3xl font-bold text-gray-800 mb-2">
+                                        0%
+                                    </div>
+                                    <div id="percentageLabel" class="text-lg text-gray-600">
+                                        Symptom Severity Level
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white p-4 rounded-lg">
+                                <div class="text-center">
+                                    <div id="interpretationLevel" class="text-lg font-semibold text-gray-800">
+                                        
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div id="subscaleResults" style="display: none;" class="bg-white p-4 rounded-lg">
+                                <h4 class="font-medium text-gray-800 mb-3">Subscale Scores</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>POPDI-6:</span>
+                                        <span id="popdiResult" class="font-medium">0.0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>CRADI-8:</span>
+                                        <span id="cradiResult" class="font-medium">0.0</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>UDI-6:</span>
+                                        <span id="udiResult" class="font-medium">0.0</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="validationError" style="display: none;" class="bg-yellow-50 p-4 rounded-lg border-2 border-yellow-200">
+                        <p id="validationMessage" class="text-yellow-800">
+                            Please enter a valid score.
+                        </p>
+                    </div>
+
+                    <div class="bg-gray-50 p-6 rounded-lg">
+                        <h3 class="font-semibold text-gray-800 mb-3">Quick Reference</h3>
+                        <div id="quickReference" class="text-sm text-gray-600 space-y-2">
+                            <p><strong>Minimal Impairment:</strong> 0-20%</p>
+                            <p><strong>Mild Impairment:</strong> 21-40%</p>
+                            <p><strong>Moderate Impairment:</strong> 41-60%</p>
+                            <p><strong>Severe Impairment:</strong> 61-80%</p>
+                            <p><strong>Very Severe Impairment:</strong> 81-100%</p>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-4">
+                            * Interpretation may vary by specific assessment tool and clinical context
+                        </p>
+                    </div>
                 </div>
             </div>
-        </main>
+
+            <div class="mt-8 p-4 bg-pink-50 rounded-lg">
+                <p class="text-sm text-pink-800">
+                    <strong>Note:</strong> This calculator is for educational and clinical reference purposes in pelvic health assessment. 
+                    Always refer to the original assessment guidelines and consider clinical context when interpreting results. 
+                    These tools should be used by qualified healthcare professionals.
+                </p>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Initialize data
-        let entries = JSON.parse(localStorage.getItem('bladderBowelEntries') || '[]');
-        let patientInfo = JSON.parse(localStorage.getItem('patientInfo') || '{}');
-
-        // Utility functions
-        function showMessage(message, type = 'success') {
-            const container = document.getElementById('message-container');
-            const messageBox = document.createElement('div');
-            messageBox.textContent = message;
-            messageBox.className = `message-box message-${type}`;
-            container.appendChild(messageBox);
-
-            setTimeout(() => {
-                if (messageBox.parentNode) {
-                    messageBox.remove();
+        const assessmentTools = {
+            'APFQ': {
+                name: 'Australian Pelvic Floor Questionnaire',
+                maxScore: 344, minScore: 43, questions: 43,
+                interpretation: (score) => {
+                    const percentage = ((score - 43) / 301) * 100;
+                    let level = '';
+                    if (percentage <= 20) level = 'Minimal pelvic floor dysfunction';
+                    else if (percentage <= 40) level = 'Mild pelvic floor dysfunction';
+                    else if (percentage <= 60) level = 'Moderate pelvic floor dysfunction';
+                    else if (percentage <= 80) level = 'Severe pelvic floor dysfunction';
+                    else level = 'Very severe pelvic floor dysfunction';
+                    return { percentage: percentage.toFixed(1), level };
                 }
-            }, 3000);
-        }
+            },
+            'PAC-SYM': {
+                name: 'Patient Assessment of Constipation Symptoms',
+                maxScore: 4.0, minScore: 0.0, questions: 12,
+                interpretation: (score) => {
+                    const percentage = (score / 4.0) * 100;
+                    let level = '';
+                    if (percentage <= 25) level = 'Minimal constipation symptoms';
+                    else if (percentage <= 50) level = 'Mild constipation symptoms';
+                    else if (percentage <= 75) level = 'Moderate constipation symptoms';
+                    else level = 'Severe constipation symptoms';
+                    return { percentage: percentage.toFixed(1), level };
+                }
+            },
+            'FIQL': {
+                name: 'Fecal Incontinence Quality of Life Scale',
+                maxScore: 4.0, minScore: 1.0, questions: 29,
+                interpretation: (score) => {
+                    const percentage = ((4.0 - score) / 3.0) * 100;
+                    let level = '';
+                    if (percentage <= 20) level = 'Excellent quality of life';
+                    else if (percentage <= 40) level = 'Good quality of life';
+                    else if (percentage <= 60) level = 'Fair quality of life';
+                    else if (percentage <= 80) level = 'Poor quality of life';
+                    else level = 'Very poor quality of life';
+                    return { percentage: percentage.toFixed(1), level };
+                }
+            },
+            'MENQOL': {
+                name: 'Menopause-Specific Quality of Life',
+                maxScore: 8.0, minScore: 1.0, questions: 29,
+                interpretation: (score) => {
+                    const percentage = ((score - 1.0) / 7.0) * 100;
+                    let level = '';
+                    if (percentage <= 20) level = 'Minimal menopausal symptoms';
+                    else if (percentage <= 40) level = 'Mild menopausal symptoms';
+                    else if (percentage <= 60) level = 'Moderate menopausal symptoms';
+                    else if (percentage <= 80) level = 'Severe menopausal symptoms';
+                    else level = 'Very severe menopausal symptoms';
+                    return { percentage: percentage.toFixed(1), level };
+                }
+            },
+            'PFDI': {
+                name: 'Pelvic Floor Disability Index (PFDI-20)',
+                maxScore: 300, minScore: 0, questions: 20,
+                subscales: {
+                    'POPDI-6': { questions: [1, 2, 3, 4, 5, 6], name: 'Pelvic Organ Prolapse Distress Inventory' },
+                    'CRADI-8': { questions: [7, 8, 9, 10, 11, 12, 13, 14], name: 'Colorectal-Anal Distress Inventory' },
+                    'UDI-6': { questions: [15, 16, 17, 18, 19, 20], name: 'Urinary Distress Inventory' }
+                },
+                interpretation: (score) => {
+                    const percentage = (score / 300) * 100;
+                    let level = '';
+                    if (percentage <= 10) level = 'Minimal pelvic floor disability';
+                    else if (percentage <= 30) level = 'Mild pelvic floor disability';
+                    else if (percentage <= 50) level = 'Moderate pelvic floor disability';
+                    else if (percentage <= 70) level = 'Severe pelvic floor disability';
+                    else level = 'Very severe pelvic floor disability';
+                    return { percentage: percentage.toFixed(1), level };
+                }
+            },
+            'PGQ': {
+                name: 'Pelvic Girdle Questionnaire',
+                maxScore: 75, minScore: 25, questions: 25,
+                interpretation: (score) => {
+                    const percentage = ((score - 25) / 50) * 100;
+                    let level = '';
+                    if (percentage <= 20) level = 'Minimal pelvic girdle dysfunction';
+                    else if (percentage <= 40) level = 'Mild pelvic girdle dysfunction';
+                    else if (percentage <= 60) level = 'Moderate pelvic girdle dysfunction';
+                    else if (percentage <= 80) level = 'Severe pelvic girdle dysfunction';
+                    else level = 'Very severe pelvic girdle dysfunction';
+                    return { percentage: percentage.toFixed(1), level };
+                }
+            },
+            'UIQ': {
+                name: 'Urinary Incontinence Questionnaire',
+                maxScore: 91, minScore: 0, questions: 21,
+                interpretation: (score) => {
+                    const percentage = (score / 91) * 100;
+                    let level = '';
+                    if (percentage <= 10) level = 'Minimal urinary incontinence impact';
+                    else if (percentage <= 25) level = 'Mild urinary incontinence impact';
+                    else if (percentage <= 50) level = 'Moderate urinary incontinence impact';
+                    else if (percentage <= 75) level = 'Severe urinary incontinence impact';
+                    else level = 'Very severe urinary incontinence impact';
+                    return { percentage: percentage.toFixed(1), level };
+                }
+            },
+            'FSFI6': {
+                name: 'Female Sexual Function Index - 6 Item',
+                maxScore: 30, minScore: 2, questions: 6,
+                interpretation: (score) => {
+                    let level = '';
+                    if (score >= 19) level = 'Normal sexual function - Low risk of sexual dysfunction';
+                    else if (score >= 15) level = 'Mild sexual dysfunction - Some areas of concern';
+                    else if (score >= 10) level = 'Moderate sexual dysfunction - Significant functional impairment';
+                    else level = 'Severe sexual dysfunction - Major functional impairment';
+                    const percentage = ((30 - score) / 28) * 100;
+                    return { percentage: percentage.toFixed(1), level };
+                }
+            }
+        };
 
-        function saveToLocalStorage() {
-            localStorage.setItem('bladderBowelEntries', JSON.stringify(entries));
-        }
+        let selectedTest = '';
+        let calculatorMode = 'direct';
+        let individualScores = {};
+        let currentResult = null;
 
-        function savePatientInfo() {
-            localStorage.setItem('patientInfo', JSON.stringify(patientInfo));
-        }
-
-        function updateCurrentTimeDisplay() {
-            const now = new Date();
-            document.getElementById('currentTimeText').textContent = now.toLocaleString();
-        }
-
-        function setupTimeMode() {
-            const timeModeRadios = document.querySelectorAll('input[name="timeMode"]');
-            const manualDate = document.getElementById('manualDate');
-            const manualTime = document.getElementById('manualTime');
+        function handleTestChange() {
+            selectedTest = document.getElementById('testSelector').value;
             
-            // Set default values for manual inputs
-            const now = new Date();
-            manualDate.value = now.toISOString().split('T')[0];
-            manualTime.value = now.toTimeString().slice(0, 5);
-            
-            timeModeRadios.forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    if (e.target.value === 'manual') {
-                        manualDate.disabled = false;
-                        manualTime.disabled = false;
-                    } else {
-                        manualDate.disabled = true;
-                        manualTime.disabled = true;
-                    }
-                });
-            });
-        }
-
-        function getEntryTimestamp() {
-            const timeMode = document.querySelector('input[name="timeMode"]:checked').value;
-            
-            if (timeMode === 'now') {
-                return new Date().toISOString();
+            if (selectedTest) {
+                showTestInfo();
+                showCalculatorSection();
+                updateQuickReference();
             } else {
-                const date = document.getElementById('manualDate').value;
-                const time = document.getElementById('manualTime').value;
-                return new Date(`${date}T${time}`).toISOString();
+                hideTestInfo();
+                hideCalculatorSection();
+                hideResults();
+            }
+            
+            resetScores();
+        }
+
+        function showTestInfo() {
+            const tool = assessmentTools[selectedTest];
+            document.getElementById('testTitle').textContent = tool.name;
+            document.getElementById('testQuestions').textContent = tool.questions;
+            document.getElementById('testRange').textContent = `${tool.minScore} - ${tool.maxScore}`;
+            
+            // Show specific notes for certain tests
+            const noteElement = document.getElementById('testNote');
+            const noteTextElement = document.getElementById('testNoteText');
+            
+            let noteText = '';
+            if (selectedTest === 'PAC-SYM') {
+                noteText = '<strong>Scoring Note:</strong> PAC-SYM is scored as a mean (0-4 scale). Items rated: 0=absent, 1=mild, 2=moderate, 3=severe, 4=very severe. Lower scores indicate less constipation symptom severity.';
+            } else if (selectedTest === 'FIQL') {
+                noteText = '<strong>Scoring Note:</strong> FIQL uses 4 domains (29 items total). Scores are averaged (1-4 scale). Lower scores indicate worse quality of life due to fecal incontinence.';
+            } else if (selectedTest === 'MENQOL') {
+                noteText = '<strong>Scoring Note:</strong> MENQOL uses a 1-8 scale (1=not experienced, 2=experienced but not bothersome, 3-8=increasing bother). Higher scores indicate more bothersome menopausal symptoms.';
+            } else if (selectedTest === 'FSFI6') {
+                noteText = '<strong>Scoring Note:</strong> FSFI-6 ranges 2-30. Validated cutoff ≤19 indicates likely sexual dysfunction. Higher scores indicate better sexual function.';
+            } else if (selectedTest === 'PFDI') {
+                noteText = '<strong>Scoring Note:</strong> PFDI-20 consists of 3 subscales: POPDI-6 (Q1-6), CRADI-8 (Q7-14), and UDI-6 (Q15-20). Each question scored 0-4. For each subscale: sum answered items ÷ number of answered items × 25. Total = sum of 3 subscales.';
+            } else if (selectedTest === 'UIQ') {
+                noteText = '<strong>Scoring Note:</strong> This 21-question assessment covers urinary leakage frequency and severity, protection usage, quality of life impact, and urinary control patterns.';
+            }
+            
+            if (noteText) {
+                noteTextElement.innerHTML = noteText;
+                noteElement.style.display = 'block';
+            } else {
+                noteElement.style.display = 'none';
+            }
+            
+            document.getElementById('testInfo').style.display = 'block';
+        }
+
+        function hideTestInfo() {
+            document.getElementById('testInfo').style.display = 'none';
+        }
+
+        function showCalculatorSection() {
+            document.getElementById('calculatorSection').style.display = 'block';
+            setupCalculatorMode();
+        }
+
+        function hideCalculatorSection() {
+            document.getElementById('calculatorSection').style.display = 'none';
+        }
+
+        function setCalculatorMode(mode) {
+            calculatorMode = mode;
+            
+            // Update button styles
+            const directBtn = document.getElementById('directModeBtn');
+            const calcBtn = document.getElementById('calculatorModeBtn');
+            
+            if (mode === 'direct') {
+                directBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-pink-500 text-white';
+                calcBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200';
+                document.getElementById('directMode').style.display = 'block';
+                document.getElementById('calculatorMode').style.display = 'none';
+            } else {
+                directBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-gray-100 text-gray-700 hover:bg-gray-200';
+                calcBtn.className = 'flex items-center gap-2 px-4 py-2 rounded-lg transition-colors bg-pink-500 text-white';
+                document.getElementById('directMode').style.display = 'none';
+                document.getElementById('calculatorMode').style.display = 'block';
+                setupCalculatorMode();
+            }
+            
+            resetScores();
+        }
+
+        function setupCalculatorMode() {
+            if (calculatorMode !== 'calculator') return;
+            
+            if (selectedTest === 'PFDI') {
+                document.getElementById('pfdiCalculator').style.display = 'block';
+                document.getElementById('generalCalculator').style.display = 'none';
+                setupPFDICalculator();
+            } else {
+                document.getElementById('pfdiCalculator').style.display = 'none';
+                document.getElementById('generalCalculator').style.display = 'block';
+                setupGeneralCalculator();
             }
         }
 
-        function loadPatientInfo() {
-            if (patientInfo.name) {
-                document.getElementById('patientName').value = patientInfo.name || '';
-                document.getElementById('patientDOB').value = patientInfo.dob || '';
-                document.getElementById('savePatientInfoBtn').textContent = 'Update Information';
+        function setupPFDICalculator() {
+            // Setup POPDI-6 questions (1-6)
+            const popdiContainer = document.getElementById('popdiQuestions');
+            popdiContainer.innerHTML = '';
+            for (let i = 1; i <= 6; i++) {
+                popdiContainer.appendChild(createQuestionInput(i));
+            }
+            
+            // Setup CRADI-8 questions (7-14)
+            const cradiContainer = document.getElementById('cradiQuestions');
+            cradiContainer.innerHTML = '';
+            for (let i = 7; i <= 14; i++) {
+                cradiContainer.appendChild(createQuestionInput(i));
+            }
+            
+            // Setup UDI-6 questions (15-20)
+            const udiContainer = document.getElementById('udiQuestions');
+            udiContainer.innerHTML = '';
+            for (let i = 15; i <= 20; i++) {
+                udiContainer.appendChild(createQuestionInput(i));
             }
         }
 
-        function renderEntries() {
-            const entriesList = document.getElementById('entriesList');
-            entriesList.innerHTML = '';
+        function setupGeneralCalculator() {
+            if (!selectedTest) return;
             
-            if (entries.length === 0) {
-                entriesList.innerHTML = '<p style="text-align: center; color: #6b7280; padding: 16px;">No entries yet. Add one above!</p>';
-                return;
+            const tool = assessmentTools[selectedTest];
+            const container = document.getElementById('questionInputs');
+            container.innerHTML = '';
+            
+            for (let i = 1; i <= tool.questions; i++) {
+                container.appendChild(createQuestionInput(i));
             }
+        }
 
-            const sortedEntries = [...entries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        function createQuestionInput(questionNum) {
+            const div = document.createElement('div');
+            div.className = 'flex flex-col';
             
-            sortedEntries.forEach((entry, index) => {
-                const entryElement = document.createElement('div');
-                entryElement.className = 'entry-card';
-                
-                const entryDate = new Date(entry.timestamp);
-                const dateStr = entryDate.toLocaleDateString();
-                const timeStr = entryDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-                const date = `${dateStr} ${timeStr}`;
-                
-                let details = '';
+            const label = document.createElement('label');
+            label.className = 'text-xs font-medium text-gray-600 mb-1';
+            label.textContent = `Q${questionNum}`;
+            
+            const input = document.createElement('input');
+            input.type = 'number';
+            input.id = `q${questionNum}`;
+            input.className = 'w-full p-2 border border-gray-300 rounded text-sm text-center';
+            input.min = '0';
+            if (selectedTest === 'PFDI') {
+                input.max = '4';
+                input.step = '1';
+            } else {
+                input.step = '0.1';
+            }
+            input.oninput = () => handleIndividualScoreChange(questionNum, input.value);
+            
+            div.appendChild(label);
+            div.appendChild(input);
+            
+            return div;
+        }
 
-                if (entry.entryType === 'urination') {
-                    details = `
-                        <p><strong>Urge:</strong> ${entry.urge}</p>
-                        <p><strong>Amount:</strong> ${entry.amount} oz</p>
-                        <p><strong>Leakage:</strong> ${entry.leakage}</p>
-                        ${entry.leakage === 'Yes' ? `<p><strong>Activity:</strong> ${entry.leakageActivity}</p>` : ''}
-                        <p><strong>Pad Usage:</strong> ${entry.padUsage}</p>
-                    `;
-                } else if (entry.entryType === 'bowelMovement') {
-                    details = `
-                        <p><strong>Consistency:</strong> ${entry.consistency}</p>
-                        <p><strong>Urgency:</strong> ${entry.urgency}</p>
-                        <p><strong>Leakage:</strong> ${entry.leakage}</p>
-                        ${entry.leakage === 'Yes' ? `<p><strong>Activity:</strong> ${entry.leakageActivity}</p>` : ''}
-                        <p><strong>Pad Usage:</strong> ${entry.padUsage}</p>
-                    `;
-                } else if (entry.entryType === 'beverage') {
-                    details = `
-                        <p><strong>Beverage Type:</strong> ${entry.beverageType}</p>
-                        <p><strong>Beverage Amount:</strong> ${entry.beverageAmount} oz</p>
-                    `;
+        function handleIndividualScoreChange(questionIndex, value) {
+            if (value === '') {
+                delete individualScores[questionIndex];
+            } else {
+                const numValue = parseFloat(value);
+                if (!isNaN(numValue)) {
+                    individualScores[questionIndex] = numValue;
                 }
+            }
+            
+            if (calculatorMode === 'calculator') {
+                calculateFromIndividual();
+            }
+        }
+
+        function calculateFromIndividual() {
+            if (selectedTest === 'PFDI') {
+                calculatePFDIScore();
+            } else {
+                calculateGeneralScore();
+            }
+        }
+
+        function calculatePFDIScore() {
+            const tool = assessmentTools[selectedTest];
+            const subscaleScores = {};
+            let totalScore = 0;
+
+            Object.entries(tool.subscales).forEach(([subscaleName, subscale]) => {
+                const subscaleQuestions = subscale.questions;
+                const answeredScores = subscaleQuestions
+                    .map(q => individualScores[q])
+                    .filter(score => score !== undefined && score !== null && !isNaN(score) && score !== '');
                 
-                entryElement.innerHTML = `
-                    <div class="entry-header">
-                        <h3 class="entry-type">${entry.entryType.replace(/([A-Z])/g, ' $1')}</h3>
-                        <div class="entry-time">${date}</div>
+                if (answeredScores.length > 0) {
+                    const sum = answeredScores.reduce((total, score) => total + parseFloat(score), 0);
+                    const mean = sum / answeredScores.length;
+                    const subscaleScore = Math.round((mean * 25) * 10) / 10;
+                    subscaleScores[subscaleName] = subscaleScore;
+                    totalScore += subscaleScore;
+                } else {
+                    subscaleScores[subscaleName] = 0;
+                }
+            });
+
+            // Update display
+            document.getElementById('popdiScore').textContent = subscaleScores['POPDI-6']?.toFixed(1) || '0.0';
+            document.getElementById('cradiScore').textContent = subscaleScores['CRADI-8']?.toFixed(1) || '0.0';
+            document.getElementById('udiScore').textContent = subscaleScores['UDI-6']?.toFixed(1) || '0.0';
+            document.getElementById('pfdiTotalScore').textContent = totalScore.toFixed(1);
+
+            // Calculate result
+            const result = tool.interpretation(totalScore);
+            result.subscales = subscaleScores;
+            result.totalScore = totalScore;
+            currentResult = result;
+            showResults();
+        }
+
+        function calculateGeneralScore() {
+            const total = Object.values(individualScores).reduce((sum, score) => sum + (score || 0), 0);
+            document.getElementById('generalTotalScore').textContent = total.toFixed(1);
+            
+            if (selectedTest) {
+                const tool = assessmentTools[selectedTest];
+                if (total >= tool.minScore && total <= tool.maxScore) {
+                    const result = tool.interpretation(total);
+                    result.totalScore = total;
+                    currentResult = result;
+                    showResults();
+                } else {
+                    showValidationError();
+                }
+            }
+        }
+
+        function calculateResult() {
+            const totalInput = document.getElementById('totalScore');
+            const score = parseFloat(totalInput.value);
+            
+            if (selectedTest && !isNaN(score)) {
+                const tool = assessmentTools[selectedTest];
+                if (score >= tool.minScore && score <= tool.maxScore) {
+                    const result = tool.interpretation(score);
+                    result.totalScore = score;
+                    currentResult = result;
+                    showResults();
+                    hideValidationError();
+                } else {
+                    showValidationError();
+                }
+            } else {
+                hideResults();
+                hideValidationError();
+            }
+        }
+
+        function showResults() {
+            if (!currentResult) return;
+
+            document.getElementById('percentageScore').textContent = `${currentResult.percentage}%`;
+            document.getElementById('interpretationLevel').textContent = currentResult.level;
+            
+            // Update percentage label based on test type
+            const percentageLabel = document.getElementById('percentageLabel');
+            if (selectedTest === 'FIQL') {
+                percentageLabel.textContent = 'Quality of Life Impact';
+            } else if (selectedTest === 'FSFI6') {
+                percentageLabel.textContent = 'Sexual Function Impact';
+            } else if (selectedTest === 'UIQ') {
+                percentageLabel.textContent = 'Urinary Incontinence Impact';
+            } else {
+                percentageLabel.textContent = 'Symptom Severity Level';
+            }
+
+            // Show subscale results for PFDI
+            if (selectedTest === 'PFDI' && currentResult.subscales) {
+                document.getElementById('popdiResult').textContent = currentResult.subscales['POPDI-6']?.toFixed(1) || '0.0';
+                document.getElementById('cradiResult').textContent = currentResult.subscales['CRADI-8']?.toFixed(1) || '0.0';
+                document.getElementById('udiResult').textContent = currentResult.subscales['UDI-6']?.toFixed(1) || '0.0';
+                document.getElementById('subscaleResults').style.display = 'block';
+            } else {
+                document.getElementById('subscaleResults').style.display = 'none';
+            }
+
+            document.getElementById('resultsSection').style.display = 'block';
+            hideValidationError();
+        }
+
+        function hideResults() {
+            document.getElementById('resultsSection').style.display = 'none';
+        }
+
+        function showValidationError() {
+            if (selectedTest) {
+                const tool = assessmentTools[selectedTest];
+                document.getElementById('validationMessage').textContent = 
+                    `Please enter a valid score between ${tool.minScore} and ${tool.maxScore}.`;
+            }
+            document.getElementById('validationError').style.display = 'block';
+            hideResults();
+        }
+
+        function hideValidationError() {
+            document.getElementById('validationError').style.display = 'none';
+        }
+
+        function updateQuickReference() {
+            const quickRef = document.getElementById('quickReference');
+            
+            if (selectedTest === 'APFQ') {
+                quickRef.innerHTML = `
+                    <p><strong>Minimal dysfunction:</strong> 43-103 points</p>
+                    <p><strong>Mild dysfunction:</strong> 104-163 points</p>
+                    <p><strong>Moderate dysfunction:</strong> 164-223 points</p>
+                    <p><strong>Severe dysfunction:</strong> 224-283 points</p>
+                    <p><strong>Very severe dysfunction:</strong> 284-344 points</p>
+                    <div class="mt-3 p-3 bg-blue-50 rounded">
+                        <p class="text-xs text-blue-800"><strong>Note:</strong> APFQ has 43 questions across 4 domains (1-8 scale)</p>
                     </div>
-                    <div class="entry-details">
-                        ${details}
-                    </div>
-                    <button class="btn btn-danger btn-small delete-btn" data-index="${index}">
-                        Delete
-                    </button>
                 `;
-                entriesList.appendChild(entryElement);
-            });
-            
-            // Add delete button event listeners
-            document.querySelectorAll('.delete-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const originalIndex = parseInt(e.target.dataset.index);
-                    const entryToDelete = sortedEntries[originalIndex];
-                    const actualIndex = entries.findIndex(entry => 
-                        entry.timestamp === entryToDelete.timestamp && 
-                        entry.entryType === entryToDelete.entryType
-                    );
-                    
-                    if (actualIndex !== -1) {
-                        entries.splice(actualIndex, 1);
-                        saveToLocalStorage();
-                        renderEntries();
-                        showMessage('Entry deleted successfully.');
-                    }
-                });
-            });
+            } else if (selectedTest === 'PAC-SYM') {
+                quickRef.innerHTML = `
+                    <p><strong>Minimal symptoms:</strong> 0.0-1.0 points</p>
+                    <p><strong>Mild symptoms:</strong> 1.1-2.0 points</p>
+                    <p><strong>Moderate symptoms:</strong> 2.1-3.0 points</p>
+                    <p><strong>Severe symptoms:</strong> 3.1-4.0 points</p>
+                    <div class="mt-3 p-3 bg-blue-50 rounded">
+                        <p class="text-xs text-blue-800"><strong>Note:</strong> Mean score calculated from 12 items (0-4 scale)</p>
+                    </div>
+                `;
+            } else if (selectedTest === 'FIQL') {
+                quickRef.innerHTML = `
+                    <p><strong>Excellent QoL:</strong> 3.41-4.0 points</p>
+                    <p><strong>Good QoL:</strong> 2.81-3.40 points</p>
+                    <p><strong>Fair QoL:</strong> 2.21-2.80 points</p>
+                    <p><strong>Poor QoL:</strong> 1.61-2.20 points</p>
+                    <p><strong>Very poor QoL:</strong> 1.0-1.60 points</p>
+                    <div class="mt-3 p-3 bg-blue-50 rounded">
+                        <p class="text-xs text-blue-800"><strong>Note:</strong> Mean score from 29 items; lower scores = worse quality of life</p>
+                    </div>
+                `;
+            } else if (selectedTest === 'MENQOL') {
+                quickRef.innerHTML = `
+                    <p><strong>Minimal symptoms:</strong> 1.0-2.4 points</p>
+                    <p><strong>Mild symptoms:</strong> 2.5-3.8 points</p>
+                    <p><strong>Moderate symptoms:</strong> 3.9-5.2 points</p>
+                    <p><strong>Severe symptoms:</strong> 5.3-6.6 points</p>
+                    <p><strong>Very severe symptoms:</strong> 6.7-8.0 points</p>
+                    <div class="mt-3 p-3 bg-blue-50 rounded">
+                        <p class="text-xs text-blue-800"><strong>Note:</strong> Mean score from 29 items (1-8 scale); higher scores = more bothersome</p>
+                    </div>
+                `;
+            } else if (selectedTest === 'FSFI6') {
+                quickRef.innerHTML = `
+                    <p><strong>Normal function:</strong> 19-30 points</p>
+                    <p><strong>Mild dysfunction:</strong> 15-18 points</p>
+                    <p><strong>Moderate dysfunction:</strong> 10-14 points</p>
+                    <p><strong>Severe dysfunction:</strong> 2-9 points</p>
+                    <div class="mt-3 p-3 bg-blue-50 rounded">
+                        <p class="text-xs text-blue-800"><strong>Note:</strong> Cutoff ≤19 indicates likely sexual dysfunction</p>
+                    </div>
+                `;
+            } else if (selectedTest === 'PFDI') {
+                quickRef.innerHTML = `
+                    <p><strong>Minimal disability:</strong> 0-30 points</p>
+                    <p><strong>Mild disability:</strong> 31-90 points</p>
+                    <p><strong>Moderate disability:</strong> 91-150 points</p>
+                    <p><strong>Severe disability:</strong> 151-210 points</p>
+                    <p><strong>Very severe disability:</strong> 211-300 points</p>
+                    <div class="mt-3 p-3 bg-blue-50 rounded">
+                        <p class="text-xs text-blue-800"><strong>Scoring:</strong> Mean of answered items × 25 for each subscale, then sum all subscales</p>
+                        <p class="text-xs text-blue-800">POPDI-6 (Q1-6) + CRADI-8 (Q7-14) + UDI-6 (Q15-20)</p>
+                    </div>
+                `;
+            } else if (selectedTest === 'UIQ') {
+                quickRef.innerHTML = `
+                    <p><strong>Minimal impact:</strong> 0-9 points</p>
+                    <p><strong>Mild impact:</strong> 10-23 points</p>
+                    <p><strong>Moderate impact:</strong> 24-45 points</p>
+                    <p><strong>Severe impact:</strong> 46-68 points</p>
+                    <p><strong>Very severe impact:</strong> 69-91 points</p>
+                `;
+            } else {
+                quickRef.innerHTML = `
+                    <p><strong>Minimal Impairment:</strong> 0-20%</p>
+                    <p><strong>Mild Impairment:</strong> 21-40%</p>
+                    <p><strong>Moderate Impairment:</strong> 41-60%</p>
+                    <p><strong>Severe Impairment:</strong> 61-80%</p>
+                    <p><strong>Very Severe Impairment:</strong> 81-100%</p>
+                `;
+            }
         }
 
-        // Event Listeners
-        document.getElementById('patientInfoForm').addEventListener('submit', (e) => {
-            e.preventDefault();
+        function resetScores() {
+            individualScores = {};
+            currentResult = null;
             
-            patientInfo = {
-                name: document.getElementById('patientName').value,
-                dob: document.getElementById('patientDOB').value,
-                timestamp: new Date().toISOString()
-            };
+            // Clear all input fields
+            const inputs = document.querySelectorAll('input[type="number"]');
+            inputs.forEach(input => input.value = '');
             
-            savePatientInfo();
-            document.getElementById('savePatientInfoBtn').textContent = 'Update Information';
-            showMessage('Patient information saved successfully!');
-        });
-
-        document.getElementById('trackerForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-
-            const entryType = document.getElementById('entryType').value;
-            let newEntry = { 
-                entryType, 
-                timestamp: getEntryTimestamp() 
-            };
-
-            if (entryType === 'urination') {
-                newEntry.urge = document.querySelector('input[name="urge"]:checked')?.value || 'None';
-                newEntry.amount = document.getElementById('urinationAmount').value || '';
-                newEntry.leakage = document.querySelector('input[name="urinationLeakage"]:checked')?.value || 'No';
-                newEntry.leakageActivity = newEntry.leakage === 'Yes' ? (document.getElementById('urinationLeakageActivity').value || '') : '';
-                newEntry.padUsage = document.querySelector('input[name="urinationPadUsage"]:checked')?.value || 'Not changed';
-            } else if (entryType === 'bowelMovement') {
-                newEntry.consistency = document.getElementById('consistency').value || '';
-                newEntry.urgency = document.querySelector('input[name="urgency"]:checked')?.value || 'None';
-                newEntry.leakage = document.querySelector('input[name="bowelLeakage"]:checked')?.value || 'No';
-                newEntry.leakageActivity = newEntry.leakage === 'Yes' ? (document.getElementById('bowelLeakageActivity').value || '') : '';
-                newEntry.padUsage = document.querySelector('input[name="bowelPadUsage"]:checked')?.value || 'Not changed';
-            } else if (entryType === 'beverage') {
-                newEntry.beverageType = document.getElementById('beverageType').value || '';
-                newEntry.beverageAmount = document.getElementById('beverageAmount').value || '';
-            }
+            // Reset PFDI display scores
+            document.getElementById('popdiScore').textContent = '0.0';
+            document.getElementById('cradiScore').textContent = '0.0';
+            document.getElementById('udiScore').textContent = '0.0';
+            document.getElementById('pfdiTotalScore').textContent = '0.0';
+            document.getElementById('generalTotalScore').textContent = '0.0';
             
-            entries.push(newEntry);
-            saveToLocalStorage();
-            renderEntries();
-            document.getElementById('trackerForm').reset();
-            
-            // Reset time mode to current time after submission
-            document.querySelector('input[name="timeMode"][value="now"]').checked = true;
-            document.getElementById('manualDate').disabled = true;
-            document.getElementById('manualTime').disabled = true;
-            
-            showMessage('Entry added successfully!');
-        });
-
-        // Entry type change handler
-        document.getElementById('entryType').addEventListener('change', (e) => {
-            const urinationFields = document.getElementById('urination-fields');
-            const bowelFields = document.getElementById('bowel-fields');
-            const beverageFields = document.getElementById('beverage-fields');
-            
-            urinationFields.classList.add('hidden');
-            bowelFields.classList.add('hidden');
-            beverageFields.classList.add('hidden');
-            
-            if (e.target.value === 'urination') {
-                urinationFields.classList.remove('hidden');
-            } else if (e.target.value === 'bowelMovement') {
-                bowelFields.classList.remove('hidden');
-            } else if (e.target.value === 'beverage') {
-                beverageFields.classList.remove('hidden');
-            }
-        });
-
-        // Leakage activity handlers
-        document.querySelectorAll('input[name="urinationLeakage"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                const container = document.getElementById('urinationLeakageActivityContainer');
-                if (e.target.value === 'Yes') {
-                    container.classList.remove('hidden');
-                } else {
-                    container.classList.add('hidden');
-                }
-            });
-        });
-
-        document.querySelectorAll('input[name="bowelLeakage"]').forEach(radio => {
-            radio.addEventListener('change', (e) => {
-                const container = document.getElementById('bowelLeakageActivityContainer');
-                if (e.target.value === 'Yes') {
-                    container.classList.remove('hidden');
-                } else {
-                    container.classList.add('hidden');
-                }
-            });
-        });
-
-        // Export CSV functionality
-        document.getElementById('exportCsvBtn').addEventListener('click', () => {
-            if (entries.length === 0) {
-                showMessage('No data to export.', 'error');
-                return;
-            }
-
-            const csvRows = [];
-
-            // Add patient information header section
-            csvRows.push('PATIENT INFORMATION');
-            csvRows.push(`"Patient Name","${patientInfo.name || 'Not provided'}"`);
-            csvRows.push(`"Date of Birth","${patientInfo.dob || 'Not provided'}"`);
-            csvRows.push(''); // Empty row for separation
-
-            // Create comprehensive CSV headers for data entries
-            csvRows.push('TRACKING ENTRIES');
-            const headers = [
-                'Date',
-                'Time', 
-                'Entry Type',
-                'Urge Level',
-                'Urination Amount (oz)',
-                'Bowel Consistency',
-                'Urgency Level',
-                'Leakage (Yes/No)',
-                'Leakage Activity',
-                'Pad/Brief Usage',
-                'Beverage Type',
-                'Beverage Amount (oz)'
-            ];
-
-            csvRows.push(headers.map(h => `"${h}"`).join(','));
-
-            // Sort entries by timestamp (most recent first)
-            const sortedEntries = [...entries].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-            sortedEntries.forEach((entry) => {
-                const entryDate = new Date(entry.timestamp);
-                const date = entryDate.toLocaleDateString();
-                const time = entryDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
-
-                // Format entry type with proper capitalization
-                let entryTypeFormatted = '';
-                if (entry.entryType === 'urination') {
-                    entryTypeFormatted = 'Urination';
-                } else if (entry.entryType === 'bowelMovement') {
-                    entryTypeFormatted = 'Bowel Movement';
-                } else if (entry.entryType === 'beverage') {
-                    entryTypeFormatted = 'Beverage';
-                }
-
-                // Build the row data systematically
-                const row = [
-                    date || '',
-                    time || '',
-                    entryTypeFormatted || '',
-                    entry.urge || '', // Urge Level (urination only)
-                    entry.amount || '', // Urination Amount (urination only)
-                    entry.consistency || '', // Full bowel consistency description
-                    entry.urgency || '', // Urgency Level (bowel only)  
-                    entry.leakage || '', // Leakage (urination and bowel)
-                    entry.leakageActivity || '', // Leakage Activity (urination and bowel when applicable)
-                    entry.padUsage || '', // Pad/Brief Usage (urination and bowel)
-                    entry.beverageType || '', // Beverage Type (beverage only)
-                    entry.beverageAmount || '' // Beverage Amount (beverage only)
-                ];
-                
-                // Properly escape and quote each field
-                const escapedRow = row.map(field => {
-                    const stringField = String(field);
-                    // Escape quotes by doubling them
-                    const escapedField = stringField.replace(/"/g, '""');
-                    return `"${escapedField}"`;
-                });
-                
-                csvRows.push(escapedRow.join(','));
-            });
-
-            // Generate filename with patient name if available
-            let filename = 'bladder_bowel_diary';
-            if (patientInfo.name && patientInfo.name.trim()) {
-                // Clean the name for filename (remove special characters)
-                const cleanName = patientInfo.name.trim().replace(/[^a-zA-Z0-9\s]/g, '').replace(/\s+/g, '_');
-                filename = `${cleanName}_bladder_bowel_diary`;
-            }
-            filename += `_${new Date().toISOString().split('T')[0]}.csv`;
-
-            const csvContent = csvRows.join('\n');
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a');
-            const url = URL.createObjectURL(blob);
-            link.setAttribute('href', url);
-            link.setAttribute('download', filename);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            showMessage('Data exported successfully! Open in Excel or Google Sheets for best viewing.');
-        });
-
-        // Clear all data functionality
-        document.getElementById('clearDataBtn').addEventListener('click', () => {
-            if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
-                entries = [];
-                patientInfo = {};
-                localStorage.removeItem('bladderBowelEntries');
-                localStorage.removeItem('patientInfo');
-                renderEntries();
-                document.getElementById('patientInfoForm').reset();
-                document.getElementById('savePatientInfoBtn').textContent = 'Save Information';
-                showMessage('All data cleared successfully.');
-            }
-        });
-
-        // Initialize the app
-        updateCurrentTimeDisplay();
-        setInterval(updateCurrentTimeDisplay, 1000);
-        setupTimeMode();
-        loadPatientInfo();
-        renderEntries();
-        setupRadioButtons();
-
-        // Setup radio button click handlers
-        function setupRadioButtons() {
-            document.querySelectorAll('.radio-option span').forEach(span => {
-                span.addEventListener('click', function() {
-                    const radio = this.previousElementSibling;
-                    if (radio && radio.type === 'radio') {
-                        radio.checked = true;
-                        
-                        // Trigger change event for any handlers
-                        radio.dispatchEvent(new Event('change', { bubbles: true }));
-                    }
-                });
-            });
-
-            // Also ensure actual radio inputs work
-            document.querySelectorAll('input[type="radio"]').forEach(radio => {
-                radio.addEventListener('change', function() {
-                    // Update visual state by forcing a recheck
-                    const allRadiosInGroup = document.querySelectorAll(`input[name="${this.name}"]`);
-                    allRadiosInGroup.forEach(r => {
-                        const span = r.nextElementSibling;
-                        if (span) {
-                            if (r.checked) {
-                                span.style.backgroundColor = '#4f46e5';
-                                span.style.color = 'white';
-                                span.style.borderColor = '#4f46e5';
-                            } else {
-                                span.style.backgroundColor = '';
-                                span.style.color = '';
-                                span.style.borderColor = '#d1d5db';
-                            }
-                        }
-                    });
-                });
-            });
+            hideResults();
+            hideValidationError();
         }
+
+        function resetCalculator() {
+            selectedTest = '';
+            calculatorMode = 'direct';
+            
+            document.getElementById('testSelector').value = '';
+            hideTestInfo();
+            hideCalculatorSection();
+            
+            // Reset mode buttons
+            setCalculatorMode('direct');
+            
+            resetScores();
+            
+            // Reset quick reference to default
+            const quickRef = document.getElementById('quickReference');
+            quickRef.innerHTML = `
+                <p><strong>Minimal Impairment:</strong> 0-20%</p>
+                <p><strong>Mild Impairment:</strong> 21-40%</p>
+                <p><strong>Moderate Impairment:</strong> 41-60%</p>
+                <p><strong>Severe Impairment:</strong> 61-80%</p>
+                <p><strong>Very Severe Impairment:</strong> 81-100%</p>
+            `;
+        }
+
+        // Initialize calculator
+        setCalculatorMode('direct');
     </script>
 </body>
 </html>
