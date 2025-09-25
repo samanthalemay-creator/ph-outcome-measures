@@ -142,6 +142,70 @@
                                 </div>
                             </div>
 
+                            <div id="apfqCalculator" style="display: none;" class="space-y-4">
+                                <div class="bg-purple-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-purple-800 mb-2">APFQ Individual Question Scores</h4>
+                                    <p class="text-sm text-purple-700 mb-4">
+                                        Enter scores for each question (0-4). For each domain: sum items ÷ number of items × 10 = domain score (0-10).
+                                    </p>
+                                </div>
+                                
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h5 class="font-medium text-gray-800 mb-3">Bladder Function (Questions 1-10)</h5>
+                                    <div class="grid grid-cols-5 sm:grid-cols-10 gap-2" id="bladderQuestions">
+                                        <!-- Questions 1-10 -->
+                                    </div>
+                                    <div class="mt-2 text-right">
+                                        <span class="text-sm font-medium text-gray-600">
+                                            Domain Score: <span id="bladderScore">0.0</span>/10
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h5 class="font-medium text-gray-800 mb-3">Bowel Function (Questions 11-23)</h5>
+                                    <div class="grid grid-cols-5 sm:grid-cols-10 gap-2" id="bowelQuestions">
+                                        <!-- Questions 11-23 -->
+                                    </div>
+                                    <div class="mt-2 text-right">
+                                        <span class="text-sm font-medium text-gray-600">
+                                            Domain Score: <span id="bowelScore">0.0</span>/10
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h5 class="font-medium text-gray-800 mb-3">Prolapse Function (Questions 24-34)</h5>
+                                    <div class="grid grid-cols-5 sm:grid-cols-10 gap-2" id="prolapseQuestions">
+                                        <!-- Questions 24-34 -->
+                                    </div>
+                                    <div class="mt-2 text-right">
+                                        <span class="text-sm font-medium text-gray-600">
+                                            Domain Score: <span id="prolapseScore">0.0</span>/10
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-white p-4 rounded-lg border">
+                                    <h5 class="font-medium text-gray-800 mb-3">Sexual Function (Questions 35-42)</h5>
+                                    <div class="grid grid-cols-4 sm:grid-cols-8 gap-2" id="sexualQuestions">
+                                        <!-- Questions 35-42 -->
+                                    </div>
+                                    <div class="mt-2 text-right">
+                                        <span class="text-sm font-medium text-gray-600">
+                                            Domain Score: <span id="sexualScore">0.0</span>/10
+                                        </span>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-green-50 p-4 rounded-lg">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-semibold text-green-800">Total APFQ Score:</span>
+                                        <span id="apfqTotalScore" class="text-xl font-bold text-green-800">0.0/40</span>
+                                    </div>
+                                </div>
+                            </div>
+
                             <div id="generalCalculator" style="display: none;" class="space-y-4">
                                 <div class="bg-purple-50 p-4 rounded-lg">
                                     <h4 class="font-semibold text-purple-800 mb-2">Individual Question Scores</h4>
@@ -215,6 +279,28 @@
                                     </div>
                                 </div>
                             </div>
+                            
+                            <div id="domainResults" style="display: none;" class="bg-white p-4 rounded-lg">
+                                <h4 class="font-medium text-gray-800 mb-3">Domain Scores</h4>
+                                <div class="space-y-2 text-sm">
+                                    <div class="flex justify-between">
+                                        <span>Bladder:</span>
+                                        <span id="bladderResult" class="font-medium">0.0/10</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Bowel:</span>
+                                        <span id="bowelResult" class="font-medium">0.0/10</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Prolapse:</span>
+                                        <span id="prolapseResult" class="font-medium">0.0/10</span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Sexual:</span>
+                                        <span id="sexualResult" class="font-medium">0.0/10</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -254,11 +340,17 @@
         const assessmentTools = {
             'APFQ': {
                 name: 'Australian Pelvic Floor Questionnaire',
-                maxScore: 344, minScore: 43, questions: 43,
+                maxScore: 40, minScore: 0, questions: 42,
+                domains: {
+                    'Bladder': { questions: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], name: 'Bladder Function' },
+                    'Bowel': { questions: [11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23], name: 'Bowel Function' },
+                    'Prolapse': { questions: [24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34], name: 'Pelvic Organ Prolapse' },
+                    'Sexual': { questions: [35, 36, 37, 38, 39, 40, 41, 42], name: 'Sexual Function' }
+                },
                 interpretation: (score) => {
-                    const percentage = ((score - 43) / 301) * 100;
+                    const percentage = (score / 40) * 100;
                     let level = '';
-                    if (percentage <= 20) level = 'Minimal pelvic floor dysfunction';
+                    if (percentage <= 25) level = 'Minimal pelvic floor dysfunction';
                     else if (percentage <= 40) level = 'Mild pelvic floor dysfunction';
                     else if (percentage <= 60) level = 'Moderate pelvic floor dysfunction';
                     else if (percentage <= 80) level = 'Severe pelvic floor dysfunction';
@@ -411,6 +503,8 @@
                 noteText = '<strong>Scoring Note:</strong> FSFI-6 ranges 2-30. Validated cutoff ≤19 indicates likely sexual dysfunction. Higher scores indicate better sexual function.';
             } else if (selectedTest === 'PFDI') {
                 noteText = '<strong>Scoring Note:</strong> PFDI-20 consists of 3 subscales: POPDI-6 (Q1-6), CRADI-8 (Q7-14), and UDI-6 (Q15-20). Each question scored 0-4. For each subscale: sum answered items ÷ number of answered items × 25. Total = sum of 3 subscales.';
+            } else if (selectedTest === 'APFQ') {
+                noteText = '<strong>Scoring Note:</strong> APFQ has 4 domains: Bladder (Q1-10), Bowel (Q11-23), Prolapse (Q24-34), Sexual (Q35-42). Each question scored 0-4. For each domain: sum items ÷ number of items × 10 = domain score (0-10). Total = sum of 4 domains (0-40).';
             } else if (selectedTest === 'UIQ') {
                 noteText = '<strong>Scoring Note:</strong> This 21-question assessment covers urinary leakage frequency and severity, protection usage, quality of life impact, and urinary control patterns.';
             }
@@ -467,10 +561,17 @@
             if (selectedTest === 'PFDI') {
                 document.getElementById('pfdiCalculator').style.display = 'block';
                 document.getElementById('generalCalculator').style.display = 'none';
+                document.getElementById('apfqCalculator').style.display = 'none';
                 setupPFDICalculator();
+            } else if (selectedTest === 'APFQ') {
+                document.getElementById('pfdiCalculator').style.display = 'none';
+                document.getElementById('generalCalculator').style.display = 'none';
+                document.getElementById('apfqCalculator').style.display = 'block';
+                setupAPFQCalculator();
             } else {
                 document.getElementById('pfdiCalculator').style.display = 'none';
                 document.getElementById('generalCalculator').style.display = 'block';
+                document.getElementById('apfqCalculator').style.display = 'none';
                 setupGeneralCalculator();
             }
         }
@@ -495,6 +596,36 @@
             udiContainer.innerHTML = '';
             for (let i = 15; i <= 20; i++) {
                 udiContainer.appendChild(createQuestionInput(i));
+            }
+        }
+
+        function setupAPFQCalculator() {
+            // Setup Bladder questions (1-10)
+            const bladderContainer = document.getElementById('bladderQuestions');
+            bladderContainer.innerHTML = '';
+            for (let i = 1; i <= 10; i++) {
+                bladderContainer.appendChild(createQuestionInput(i));
+            }
+            
+            // Setup Bowel questions (11-23)
+            const bowelContainer = document.getElementById('bowelQuestions');
+            bowelContainer.innerHTML = '';
+            for (let i = 11; i <= 23; i++) {
+                bowelContainer.appendChild(createQuestionInput(i));
+            }
+            
+            // Setup Prolapse questions (24-34)
+            const prolapseContainer = document.getElementById('prolapseQuestions');
+            prolapseContainer.innerHTML = '';
+            for (let i = 24; i <= 34; i++) {
+                prolapseContainer.appendChild(createQuestionInput(i));
+            }
+            
+            // Setup Sexual questions (35-42)
+            const sexualContainer = document.getElementById('sexualQuestions');
+            sexualContainer.innerHTML = '';
+            for (let i = 35; i <= 42; i++) {
+                sexualContainer.appendChild(createQuestionInput(i));
             }
         }
 
@@ -523,7 +654,7 @@
             input.id = `q${questionNum}`;
             input.className = 'w-full p-2 border border-gray-300 rounded text-sm text-center';
             input.min = '0';
-            if (selectedTest === 'PFDI') {
+            if (selectedTest === 'PFDI' || selectedTest === 'APFQ') {
                 input.max = '4';
                 input.step = '1';
             } else {
@@ -555,6 +686,8 @@
         function calculateFromIndividual() {
             if (selectedTest === 'PFDI') {
                 calculatePFDIScore();
+            } else if (selectedTest === 'APFQ') {
+                calculateAPFQScore();
             } else {
                 calculateGeneralScore();
             }
@@ -591,6 +724,43 @@
             // Calculate result
             const result = tool.interpretation(totalScore);
             result.subscales = subscaleScores;
+            result.totalScore = totalScore;
+            currentResult = result;
+            showResults();
+        }
+
+        function calculateAPFQScore() {
+            const tool = assessmentTools[selectedTest];
+            const domainScores = {};
+            let totalScore = 0;
+
+            Object.entries(tool.domains).forEach(([domainName, domain]) => {
+                const domainQuestions = domain.questions;
+                const answeredScores = domainQuestions
+                    .map(q => individualScores[q])
+                    .filter(score => score !== undefined && score !== null && !isNaN(score) && score !== '');
+                
+                if (answeredScores.length > 0) {
+                    const sum = answeredScores.reduce((total, score) => total + parseFloat(score), 0);
+                    const mean = sum / answeredScores.length;
+                    const domainScore = Math.round((mean * 10) * 10) / 10;
+                    domainScores[domainName] = domainScore;
+                    totalScore += domainScore;
+                } else {
+                    domainScores[domainName] = 0;
+                }
+            });
+
+            // Update display
+            document.getElementById('bladderScore').textContent = domainScores['Bladder']?.toFixed(1) || '0.0';
+            document.getElementById('bowelScore').textContent = domainScores['Bowel']?.toFixed(1) || '0.0';
+            document.getElementById('prolapseScore').textContent = domainScores['Prolapse']?.toFixed(1) || '0.0';
+            document.getElementById('sexualScore').textContent = domainScores['Sexual']?.toFixed(1) || '0.0';
+            document.getElementById('apfqTotalScore').textContent = totalScore.toFixed(1) + '/40';
+
+            // Calculate result
+            const result = tool.interpretation(totalScore);
+            result.domains = domainScores;
             result.totalScore = totalScore;
             currentResult = result;
             showResults();
@@ -658,8 +828,17 @@
                 document.getElementById('cradiResult').textContent = currentResult.subscales['CRADI-8']?.toFixed(1) || '0.0';
                 document.getElementById('udiResult').textContent = currentResult.subscales['UDI-6']?.toFixed(1) || '0.0';
                 document.getElementById('subscaleResults').style.display = 'block';
+                document.getElementById('domainResults').style.display = 'none';
+            } else if (selectedTest === 'APFQ' && currentResult.domains) {
+                document.getElementById('bladderResult').textContent = currentResult.domains['Bladder']?.toFixed(1) + '/10' || '0.0/10';
+                document.getElementById('bowelResult').textContent = currentResult.domains['Bowel']?.toFixed(1) + '/10' || '0.0/10';
+                document.getElementById('prolapseResult').textContent = currentResult.domains['Prolapse']?.toFixed(1) + '/10' || '0.0/10';
+                document.getElementById('sexualResult').textContent = currentResult.domains['Sexual']?.toFixed(1) + '/10' || '0.0/10';
+                document.getElementById('domainResults').style.display = 'block';
+                document.getElementById('subscaleResults').style.display = 'none';
             } else {
                 document.getElementById('subscaleResults').style.display = 'none';
+                document.getElementById('domainResults').style.display = 'none';
             }
 
             document.getElementById('resultsSection').style.display = 'block';
@@ -689,13 +868,15 @@
             
             if (selectedTest === 'APFQ') {
                 quickRef.innerHTML = `
-                    <p><strong>Minimal dysfunction:</strong> 43-103 points</p>
-                    <p><strong>Mild dysfunction:</strong> 104-163 points</p>
-                    <p><strong>Moderate dysfunction:</strong> 164-223 points</p>
-                    <p><strong>Severe dysfunction:</strong> 224-283 points</p>
-                    <p><strong>Very severe dysfunction:</strong> 284-344 points</p>
+                    <p><strong>Minimal dysfunction:</strong> 0-10 points</p>
+                    <p><strong>Mild dysfunction:</strong> 11-16 points</p>
+                    <p><strong>Moderate dysfunction:</strong> 17-24 points</p>
+                    <p><strong>Severe dysfunction:</strong> 25-32 points</p>
+                    <p><strong>Very severe dysfunction:</strong> 33-40 points</p>
                     <div class="mt-3 p-3 bg-blue-50 rounded">
-                        <p class="text-xs text-blue-800"><strong>Note:</strong> APFQ has 43 questions across 4 domains (1-8 scale)</p>
+                        <p class="text-xs text-blue-800"><strong>Scoring:</strong> Sum items per domain ÷ number of items × 10 = domain score (0-10)</p>
+                        <p class="text-xs text-blue-800">Bladder (Q1-10) + Bowel (Q11-23) + Prolapse (Q24-34) + Sexual (Q35-42)</p>
+                        <p class="text-xs text-blue-800"><strong>Total range:</strong> 0-40 points</p>
                     </div>
                 `;
             } else if (selectedTest === 'PAC-SYM') {
@@ -784,6 +965,14 @@
             document.getElementById('cradiScore').textContent = '0.0';
             document.getElementById('udiScore').textContent = '0.0';
             document.getElementById('pfdiTotalScore').textContent = '0.0';
+            
+            // Reset APFQ display scores
+            document.getElementById('bladderScore').textContent = '0.0';
+            document.getElementById('bowelScore').textContent = '0.0';
+            document.getElementById('prolapseScore').textContent = '0.0';
+            document.getElementById('sexualScore').textContent = '0.0';
+            document.getElementById('apfqTotalScore').textContent = '0.0/40';
+            
             document.getElementById('generalTotalScore').textContent = '0.0';
             
             hideResults();
